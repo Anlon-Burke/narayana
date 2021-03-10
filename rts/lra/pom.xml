@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
   ~ Copyright 2017 Red Hat, Inc. and/or its affiliates.
   ~
   ~ Licensed under the Apache License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
-  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jboss.narayana.rts</groupId>
@@ -17,13 +19,14 @@
     <packaging>pom</packaging>
 
     <properties>
-        <version.json.api>1.1</version.json.api>
         <version.jackson>2.9.10.1</version.jackson>
 
         <version.jboss-interceptors>1.0.1.Final</version.jboss-interceptors>
         <version.cdi-api>2.0</version.cdi-api>
         <version.servlet-api>2.5</version.servlet-api>
         <version.jboss-modules>1.10.2.Final</version.jboss-modules>
+        <version.jboss.json-api>1.0.0.Final</version.jboss.json-api>
+        <version.org.jboss.servlet.api>1.0.0.Final</version.org.jboss.servlet.api>
 
         <version.microprofile.lra.api>1.0-RC2</version.microprofile.lra.api>
         <version.microprofile.lra.tck>1.0-RC2</version.microprofile.lra.tck>
@@ -74,20 +77,19 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- for Intellij -->
-        <dependency>
-            <groupId>org.jboss.spec</groupId>
-            <artifactId>jboss-javaee-all-7.0</artifactId>
-            <version>1.0.3.Final</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec.javax.ws.rs</groupId>
-            <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-            <version>${version.javax.ws.rs-api}</version>
-        </dependency>
-
         <!-- for testing -->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>${version.hamcrest}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>${version.hamcrest}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
