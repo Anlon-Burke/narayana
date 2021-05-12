@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>5.11.2.Final-SNAPSHOT</version>
+    <version>5.11.3.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -40,6 +40,7 @@
     <module>spi</module>
     <module>jms</module>
     <module>narayana-jta</module>
+    <module>narayana-jta-jakarta</module>
   </modules>
   <profiles>
       <profile>
