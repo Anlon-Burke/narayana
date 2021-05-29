@@ -59,6 +59,9 @@ import static java.security.AccessController.doPrivileged;
 public abstract class TransactionalInterceptorBase implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // to distinguish Weld implementation where WeldInvocationContext defines context data key
+    private static final String WELD_INTERCEPTOR_BINDINGS_KEY = "org.jboss.weld.interceptor.bindings";
+
     @Inject
     transient javax.enterprise.inject.spi.BeanManager beanManager;
 
@@ -103,12 +106,23 @@ public abstract class TransactionalInterceptorBase implements Serializable {
      * @return instance of {@link Transactional} annotation or null
      */
     private Transactional getTransactional(InvocationContext ic) {
-        if(interceptedBean != null) { // not-null for CDI
+        // when the CDI implementation is Weld then using the Weld API for accessing the annotated type
+        if (ic.getContextData().containsKey(WELD_INTERCEPTOR_BINDINGS_KEY)) {
+            Set<Annotation> annotationBindings = (Set<Annotation>) ic.getContextData().get(WELD_INTERCEPTOR_BINDINGS_KEY);
+            for (Annotation annotation : annotationBindings) {
+                if (annotation.annotationType() == Transactional.class) {
+                    return (Transactional) annotation;
+                }
+            }
+        } else if (interceptedBean != null) { // not-null for CDI
             // getting annotated type and method corresponding of the intercepted bean and method
             AnnotatedType<?> currentAnnotatedType = extension.getBeanToAnnotatedTypeMapping().get(interceptedBean);
+            if (currentAnnotatedType == null) {
+                throw new IllegalStateException(jtaLogger.i18NLogger.get_not_supported_non_weld_interception(interceptedBean.getName()));
+            }
             AnnotatedMethod<?> currentAnnotatedMethod = null;
-            for(AnnotatedMethod<?> methodInSearch: currentAnnotatedType.getMethods()) {
-                if(methodInSearch.getJavaMember().equals(ic.getMethod())) {
+            for (AnnotatedMethod<?> methodInSearch: currentAnnotatedType.getMethods()) {
+                if (methodInSearch.getJavaMember().equals(ic.getMethod())) {
                     currentAnnotatedMethod = methodInSearch;
                     break;
                 }
@@ -117,14 +131,14 @@ public abstract class TransactionalInterceptorBase implements Serializable {
             // check existence of the stereotype on method
             assert currentAnnotatedMethod != null;
             Transactional transactionalMethod = getTransactionalAnnotationRecursive(currentAnnotatedMethod.getAnnotations());
-            if(transactionalMethod != null) return transactionalMethod;
+            if (transactionalMethod != null) return transactionalMethod;
             // stereotype recursive search, covering ones added by an extension too
             Transactional transactionalExtension = getTransactionalAnnotationRecursive(currentAnnotatedType.getAnnotations());
-            if(transactionalExtension != null) return transactionalExtension;
+            if (transactionalExtension != null) return transactionalExtension;
             // stereotypes already merged to one chunk by BeanAttributes.getStereotypes()
-            for(Class<? extends Annotation> stereotype: interceptedBean.getStereotypes()) {
+            for (Class<? extends Annotation> stereotype: interceptedBean.getStereotypes()) {
                 Transactional transactionalAnn = stereotype.getAnnotation(Transactional.class);
-                if(transactionalAnn != null) return transactionalAnn;
+                if (transactionalAnn != null) return transactionalAnn;
             }
         } else { // null for EE components
             Transactional transactional = ic.getMethod().getAnnotation(Transactional.class);
@@ -143,18 +157,18 @@ public abstract class TransactionalInterceptorBase implements Serializable {
     }
 
     private Transactional getTransactionalAnnotationRecursive(Annotation... annotationsOnMember) {
-        if(annotationsOnMember == null) return null;
+        if (annotationsOnMember == null) return null;
         Set<Class<? extends Annotation>> stereotypeAnnotations = new HashSet<>();
 
-        for(Annotation annotation: annotationsOnMember) {
-            if(annotation.annotationType().equals(Transactional.class)) {
+        for (Annotation annotation: annotationsOnMember) {
+            if (annotation.annotationType().equals(Transactional.class)) {
                 return (Transactional) annotation;
             }
             if (beanManager.isStereotype(annotation.annotationType())) {
                 stereotypeAnnotations.add(annotation.annotationType());
             }
         }
-        for(Class<? extends Annotation> stereotypeAnnotation: stereotypeAnnotations) {
+        for (Class<? extends Annotation> stereotypeAnnotation: stereotypeAnnotations) {
             return getTransactionalAnnotationRecursive(beanManager.getStereotypeDefinition(stereotypeAnnotation));
         }
         return null;

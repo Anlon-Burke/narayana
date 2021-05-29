@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2017, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2021, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -20,24 +20,25 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
+
 package com.hp.mwtests.ts.jta.cdi.transactional.stereotype.extension;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import com.arjuna.ats.jta.TransactionManager;
 
-import com.hp.mwtests.ts.jta.cdi.transactional.stereotype.TransactionalRequiredStereotype;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.InterceptionFactory;
 
+public class TransactionalTestServiceInterceptorFactory {
+    public interface TestService {
+        int doTransactional() throws Exception;
+    }
 
-/**
- * Extension adding the {@link TransactionalRequiredStereotype}
- * at any processed bean.
- */
-public class AddStereotypeAnnotationExtension implements Extension {
-
-    void processAnnotatedType(@Observes ProcessAnnotatedType<NoAnnotationBean> bean) {
-        AnnotatedTypeWrapper<NoAnnotationBean> wrapper = new AnnotatedTypeWrapper<NoAnnotationBean>(bean);
-        wrapper.addAnnotation(TransactionalRequiredStereotype.class);
-        bean.setAnnotatedType(wrapper);
+    @Produces
+    @ApplicationScoped
+    public TestService testServiceProducer(InterceptionFactory<TestService> interceptionFactory) {
+        interceptionFactory.configure().add(new TransactionalLiteral());
+        return interceptionFactory.createInterceptedInstance(()
+                -> TransactionManager.transactionManager().getStatus());
     }
 }

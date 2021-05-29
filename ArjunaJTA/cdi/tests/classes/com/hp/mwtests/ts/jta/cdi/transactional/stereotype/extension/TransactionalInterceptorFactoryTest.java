@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2017, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2021, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -22,35 +22,33 @@
 
 package com.hp.mwtests.ts.jta.cdi.transactional.stereotype.extension;
 
-import javax.inject.Inject;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.hp.mwtests.ts.jta.cdi.transactional.stereotype.TransactionalRequiredStereotype;
+import javax.inject.Inject;
 
 @RunWith(Arquillian.class)
-public class StereotypeChangedByExtensionTest {
+public class TransactionalInterceptorFactoryTest {
     @Inject
-    NoAnnotationBean bean;
+    TransactionalTestServiceInterceptorFactory.TestService testService;
 
     @Deployment
     public static WebArchive createTestArchive() {
-        return ShrinkWrap.create(WebArchive.class, "stereotype-test.war")
-            .addPackage(StereotypeChangedByExtensionTest.class.getPackage())
-            .addClasses(TransactionalRequiredStereotype.class)
-            .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-            .addAsServiceProvider(javax.enterprise.inject.spi.Extension.class, AddStereotypeAnnotationExtension.class);
+        return ShrinkWrap.create(WebArchive.class, "transactional-interceptor-factory-test.war")
+                .addPackage(TransactionalChangedByExtensionTest.class.getPackage())
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
     }
 
-
-    @Test(expected = RuntimeException.class)
-    public void stereotypeAddedByExtensionAtBean() throws Exception {
-        bean.process();
+    @Test
+    public void workWithTestService() throws Exception {
+        Assert.assertNotNull("Expecting the producer provides the test service bean", testService);
+        Assert.assertEquals("The test service is expected to return status of a no active transaction",
+                0, testService.doTransactional());
     }
 }

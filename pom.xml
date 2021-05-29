@@ -455,7 +455,7 @@
     <version.jacorb>2.3.1jboss.patch01-brew</version.jacorb>
     <version.org.jboss.openjdk-orb>8.0.8.Final</version.org.jboss.openjdk-orb>
     <version.javax.annotation>1.2</version.javax.annotation>
-    <version.javax.enterprise>1.2</version.javax.enterprise>
+    <version.javax.enterprise>2.0</version.javax.enterprise>
     <version.javax.inject>1</version.javax.inject>
     <version.commons-httpclient>3.1-jbossorg-1</version.commons-httpclient>
     <version.log4j>1.2.17</version.log4j>
@@ -499,6 +499,7 @@
     <version.org.sonatype.plugins.nexus-staging-maven-plugin>1.6.6</version.org.sonatype.plugins.nexus-staging-maven-plugin>
     <version.maven-failsafe-plugin>2.22.0</version.maven-failsafe-plugin>
     <version.maven.checkstyle-plugin>3.1.2</version.maven.checkstyle-plugin>
+    <version.maven.jandex-plugin>1.0.6</version.maven.jandex-plugin>
     <version.doxia>1.8.1</version.doxia>
   </properties>
   <modules>
