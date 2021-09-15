@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jboss.narayana.rts</groupId>
     <artifactId>lra-test</artifactId>
-    <version>5.12.1.Final-SNAPSHOT</version>
+    <version>5.12.2.Final-SNAPSHOT</version>
   </parent>
 
   <artifactId>lra-test-arquillian-extension</artifactId>
@@ -87,6 +87,29 @@
       <properties>
         <lra.coordinator.exec.plugin.phase>none</lra.coordinator.exec.plugin.phase>
       </properties>
+    </profile>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <inherited>false</inherited>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-install-plugin</artifactId>
+            <inherited>false</inherited>
+            <executions>
+              <execution>
+                <id>default-install</id>
+                <phase>install</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
