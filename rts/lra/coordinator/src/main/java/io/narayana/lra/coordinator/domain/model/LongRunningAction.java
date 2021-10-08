@@ -26,11 +26,9 @@ import com.arjuna.ats.arjuna.coordinator.AbstractRecord;
 import com.arjuna.ats.arjuna.coordinator.ActionStatus;
 import com.arjuna.ats.arjuna.coordinator.AddOutcome;
 import com.arjuna.ats.arjuna.coordinator.BasicAction;
-import com.arjuna.ats.arjuna.coordinator.Reapable;
 import com.arjuna.ats.arjuna.coordinator.RecordList;
 import com.arjuna.ats.arjuna.coordinator.RecordListIterator;
 import com.arjuna.ats.arjuna.coordinator.RecordType;
-import com.arjuna.ats.arjuna.coordinator.TransactionReaper;
 import io.narayana.lra.Current;
 import io.narayana.lra.LRAData;
 import io.narayana.lra.logging.LRALogger;
@@ -56,10 +54,16 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class LongRunningAction extends BasicAction implements Reapable {
+public class LongRunningAction extends BasicAction {
     private static final String LRA_TYPE = "/StateManager/BasicAction/LongRunningAction";
+    private static final ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(10);
     private URI id;
     private URI parentId;
     private String clientId;
@@ -67,6 +71,7 @@ public class LongRunningAction extends BasicAction implements Reapable {
     private LRAStatus status;
     private LocalDateTime startTime;
     private LocalDateTime finishTime;
+    private ScheduledFuture<?> scheduledAbort;
     private final LRAService lraService;
     LRAParentAbstractRecord par;
 
@@ -85,6 +90,8 @@ public class LongRunningAction extends BasicAction implements Reapable {
         this.clientId = clientId;
         this.finishTime = null;
         this.status = LRAStatus.Active;
+
+        trace_progress("created");
     }
 
     public LongRunningAction(LRAService lraService, Uid rcvUid) {
@@ -96,6 +103,8 @@ public class LongRunningAction extends BasicAction implements Reapable {
         this.clientId = null;
         this.finishTime = null;
         this.status = LRAStatus.Active;
+
+        trace_progress("created");
     }
 
     // used for MBean LRA listing, see com.arjuna.ats.arjuna.tools.osb.mbean.ObjStoreBrowser
@@ -145,6 +154,8 @@ public class LongRunningAction extends BasicAction implements Reapable {
         } catch (IOException e) {
             LRALogger.i18nLogger.warn_saveState(e.getMessage());
             return false;
+        } finally {
+            trace_progress("saved");
         }
 
         return true;
@@ -294,6 +305,8 @@ public class LongRunningAction extends BasicAction implements Reapable {
             LRALogger.i18nLogger.warn_restoreState(e.getMessage());
 
             return false;
+        } finally {
+            trace_progress("restored");
         }
     }
 
@@ -397,15 +410,20 @@ public class LongRunningAction extends BasicAction implements Reapable {
     public int finishLRA(boolean cancel) {
         ReentrantLock lock = null;
 
-        // remove the LRA from the timeout scheduler (no need to take the lock)
-        TransactionReaper.transactionReaper().remove(this);
+        // check whether the transaction should cancel due to a timeout:
+        if (finishTime != null && !cancel && ChronoUnit.MILLIS.between(LocalDateTime.now(ZoneOffset.UTC), finishTime) <= 0) {
+            cancel = true;
+            trace_progress("finishing with cancel");
+        } else {
+            trace_progress("finishing");
+        }
 
         try {
             lock = lraService.tryLockTransaction(getId());
 
             if (lock == null) {
                 if (LRALogger.logger.isInfoEnabled()) {
-                    LRALogger.logger.debugf("Transaction.endLRA Some other thread is finishing LRA %s",
+                    LRALogger.logger.debugf("LongRunningAction.endLRA Some other thread is finishing LRA %s",
                             getId().toASCIIString());
                 }
 
@@ -432,7 +450,13 @@ public class LongRunningAction extends BasicAction implements Reapable {
         if (status == LRAStatus.Active) {
             updateState(cancel ? LRAStatus.Cancelling : LRAStatus.Closing);
         } else if (isFinished()) {
+            trace_progress("finished");
             return res;
+        }
+
+        if (scheduledAbort != null) {
+            scheduledAbort.cancel(false);
+            scheduledAbort = null;
         }
 
         // nested compensators need to be remembered in case the enclosing LRA decides to cancel
@@ -467,6 +491,7 @@ public class LongRunningAction extends BasicAction implements Reapable {
                     updateState(LRAStatus.Cancelling);
 
                     // call commit since the abort route does not save the failed list
+                    trace_progress("phase2Commit for nested cancel");
                     super.phase2Commit(true);
 
                     res = status();
@@ -478,6 +503,7 @@ public class LongRunningAction extends BasicAction implements Reapable {
                         updateState(LRAStatus.Closed);
                     } else {
                         // some forget calls have not been received, we need to repeat them at the next recovery pass
+                        trace_progress("H_HAZARD forget failed");
                         return ActionStatus.H_HAZARD;
                     }
                 }
@@ -499,11 +525,13 @@ public class LongRunningAction extends BasicAction implements Reapable {
                 }
 
                 // call commit since the abort route does not save the failed list
+                trace_progress("doEnd with cancel");
                 super.phase2Commit(true);
                 res = super.status();
             } else {
                 // tell each participant that the LRA closed ok
                 updateState(LRAStatus.Closing);
+                trace_progress("doEnd with close");
                 res = super.End(true);
             }
         }
@@ -526,7 +554,12 @@ public class LongRunningAction extends BasicAction implements Reapable {
             updateState(LRAStatus.Closing);
         } // otherwise status is (cancel ? LRAStatus.Cancelled : LRAStatus.Closed)
 
-        finishTime = LocalDateTime.now(ZoneOffset.UTC);
+        if (isTopLevel()) {
+            // note that we don't update the finish time for nested LRAs since their final state depends on the parent
+            finishTime = LocalDateTime.now(ZoneOffset.UTC);
+        }
+
+        trace_progress("doEnd update finishTime");
 
         updateState(); // ensure the record is removed if it finished otherwise persisted the state
 
@@ -535,6 +568,8 @@ public class LongRunningAction extends BasicAction implements Reapable {
                 lraService.finished(this, false);
             }
         }
+
+        trace_progress("doEnd finished");
 
         return res;
     }
@@ -547,6 +582,8 @@ public class LongRunningAction extends BasicAction implements Reapable {
             }
             moveTo(heuristicList, preparedList);
             checkParticipant(preparedList);
+
+            trace_progress("runPostLRAActions");
             super.phase2Commit(true);
         }
     }
@@ -671,11 +708,15 @@ public class LongRunningAction extends BasicAction implements Reapable {
         if (add(p) != AddOutcome.AR_REJECTED) {
             setTimeLimit(timeLimit);
 
+            trace_progress("enlisted " + p.getParticipantPath());
+
             return p;
         } else if (isRecovering() && p.getCompensator() == null && p.getEndNotificationUri() != null) {
             // the participant is an AfterLRA listener so manually add it to heuristic list
             heuristicList.putRear(p);
             updateState();
+
+            trace_progress("enlisted listener " + p.getParticipantPath());
 
             return p;
         }
@@ -832,8 +873,11 @@ public class LongRunningAction extends BasicAction implements Reapable {
 
     public int begin(Long timeLimit) {
         if (status() != ActionStatus.CREATED) {
+            trace_progress("begin: already running");
             return status(); // cannot begin an action twice
         }
+
+        trace_progress("begin");
 
         int res = super.Begin(null);
 
@@ -865,6 +909,8 @@ public class LongRunningAction extends BasicAction implements Reapable {
 
         setTimeLimit(timeLimit);
 
+        trace_progress("begin, deactivating");
+
         deactivate();
 
         return res;
@@ -875,11 +921,18 @@ public class LongRunningAction extends BasicAction implements Reapable {
             return Response.Status.OK.getStatusCode();
         }
 
+        return scheduleCancelation(this::abortLRA, timeLimit);
+    }
+
+    private int scheduleCancelation(Runnable runnable, Long timeLimit) {
+        assert timeLimit > 0L;
+
         if (status() != ActionStatus.RUNNING) {
             if (LRALogger.logger.isDebugEnabled()) {
                 LRALogger.logger.debugf("Ignoring timer because the action status is `%e'", status());
             }
 
+            trace_progress("scheduleCancellation: wrong state");
             return Response.Status.PRECONDITION_FAILED.getStatusCode();
         }
 
@@ -888,11 +941,6 @@ public class LongRunningAction extends BasicAction implements Reapable {
             LocalDateTime ft = LocalDateTime.now(ZoneOffset.UTC).plusNanos(timeLimit * 1000000);
 
             if (ft.isAfter(finishTime)) {
-                if (LRALogger.logger.isDebugEnabled()) {
-                    LRALogger.logger.debugf(
-                            "Ignoring timer for LRA `%s' since there is already an earlier one", id);
-                }
-
                 // the existing timer finishes before the requested one so there is nothing to do
                 return Response.Status.OK.getStatusCode();
             }
@@ -900,18 +948,32 @@ public class LongRunningAction extends BasicAction implements Reapable {
             // it is earlier so cancel the current timer
             finishTime = ft;
 
-            TransactionReaper.transactionReaper().remove(this);
+            if (scheduledAbort != null) {
+                trace_progress("scheduleCancellation: earlier than previous timer");
+                scheduledAbort.cancel(false);
+            }
         } else {
             // if timeLimit is negative the abort will be scheduled immediately
             finishTime = LocalDateTime.now(ZoneOffset.UTC).plusNanos(timeLimit * 1000000);
         }
 
-        long ttlMillis = ChronoUnit.MILLIS.between(LocalDateTime.now(ZoneOffset.UTC), finishTime) + 1;
-        // the reapers time granularity is the second so round up milliseconds to the nearest second
-        // note that ChronoUnit.SECONDS.between(...) does not facilitate rounding up
-        int ttlSeconds = (int) Math.ceil((double) ttlMillis / 1000); // the timeout in seconds
+        trace_progress("scheduleCancelation update finishTime");
 
-        TransactionReaper.transactionReaper().insert(this, ttlSeconds);
+        try {
+            scheduledAbort = scheduler.schedule(runnable, timeLimit, TimeUnit.MILLISECONDS);
+            trace_progress("scheduleCancellation accepted");
+        } catch (RejectedExecutionException executionException) {
+            // This exception does not need to be handled as the periodic recovery
+            // will eventually discover that this LRA is eligible for cancellation.
+            updateState(LRAStatus.Cancelling);
+            trace_progress("scheduleCancellation rejected");
+            LRALogger.logger.warnf(
+                    "The LRA transaction with ID %s has not correctly scheduled the task to cancel itself." +
+                            "A recovery cycle will eventually cancel this LRA.\n" +
+                            "Exception message: %s",
+                    this.getId(),
+                    executionException.getMessage());
+        }
 
         return Response.Status.OK.getStatusCode();
     }
@@ -923,12 +985,15 @@ public class LongRunningAction extends BasicAction implements Reapable {
             try {
                 int actionStatus = status();
 
+                scheduledAbort = null;
+
                 if (actionStatus == ActionStatus.RUNNING || actionStatus == ActionStatus.ABORT_ONLY) {
                     if (LRALogger.logger.isDebugEnabled()) {
-                        LRALogger.logger.debugf("Transaction.abortLRA cancelling LRA `%s", id);
+                        LRALogger.logger.debugf("LongRunningAction.abortLRA cancelling LRA `%s", id);
                     }
 
                     updateState(LRAStatus.Cancelling);
+                    trace_progress("scheduledAbort fired");
                     cancelLRA();
                 }
             } finally {
@@ -1009,31 +1074,21 @@ public class LongRunningAction extends BasicAction implements Reapable {
                 }
             }
         }
+
+        trace_progress("forget okay");
     }
 
-    @Override
-    public boolean running() {
-        return status.equals(LRAStatus.Active);
-    }
-
-    @Override
-    public int cancel() {
-        abortLRA();
-
-        if (status.equals(LRAStatus.Cancelled)) {
-            return ActionStatus.ABORTED;
+    private void trace_progress(String reason) {
+        if (LRALogger.logger.isTraceEnabled()) {
+            LRALogger.logger.tracef("%s: LRA id: %s (%s) parent: %s reason: %s state: %s created: %s ttl: %s",
+                    LocalDateTime.now(ZoneOffset.UTC), // use the same time function as used for LRA timeouts
+                    id,
+                    clientId,
+                    parentId == null ? "" : parentId,
+                    reason,
+                    status,
+                    startTime,
+                    finishTime);
         }
-
-        return status();
-    }
-
-    @Override
-    public void recordStackTraces() {
-        Reapable.super.recordStackTraces();
-    }
-
-    @Override
-    public void outputCapturedStackTraces() {
-        Reapable.super.outputCapturedStackTraces();
     }
 }

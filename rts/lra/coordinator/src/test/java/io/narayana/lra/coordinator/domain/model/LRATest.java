@@ -21,8 +21,7 @@
  */
 package io.narayana.lra.coordinator.domain.model;
 
-import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
-import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
+import com.arjuna.ats.arjuna.common.arjPropertyManager;
 import io.narayana.lra.client.NarayanaLRAClient;
 import io.narayana.lra.coordinator.api.Coordinator;
 import io.narayana.lra.coordinator.domain.service.LRAService;
@@ -154,18 +153,6 @@ public class LRATest {
         }
 
         @GET
-        @Path("timed-action")
-        @LRA(value = LRA.Type.REQUIRED, end = false, timeLimit = LRA_SHORT_TIMELIMIT) // the default unit is SECONDS
-        public Response actionWithLRA(@HeaderParam(LRA_HTTP_CONTEXT_HEADER) URI contextId,
-                                      @DefaultValue("false") @QueryParam("cancel") Boolean cancel) {
-            status = LRAStatus.Active;
-
-            server.stop(); //simulate a server crash
-
-            return getResult(cancel, contextId);
-        }
-
-        @GET
         @Path("time-limit")
         @Produces(MediaType.APPLICATION_JSON)
         @LRA(value = LRA.Type.REQUIRED, timeLimit = 500, timeUnit = ChronoUnit.MILLIS)
@@ -178,6 +165,18 @@ public class LRATest {
                 LRALogger.logger.debugf("Interrupted because time limit elapsed", e);
             }
             return Response.status(Response.Status.OK).entity(lraId.toASCIIString()).build();
+        }
+
+        @GET
+        @Path("timed-action")
+        @LRA(value = LRA.Type.REQUIRED, end = false, timeLimit = LRA_SHORT_TIMELIMIT) // the default unit is SECONDS
+        public Response actionWithLRA(@HeaderParam(LRA_HTTP_CONTEXT_HEADER) URI contextId,
+                                      @DefaultValue("false") @QueryParam("cancel") Boolean cancel) {
+            status = LRAStatus.Active;
+
+            server.stop(); //simulate a server crash
+
+            return getResult(cancel, contextId);
         }
 
         @LRA(value = LRA.Type.NESTED, end = false)
@@ -292,7 +291,6 @@ public class LRATest {
         private String restPutInvocation(URI lraURI, String path, String bodyText) {
             String id = "";
             Client client = ClientBuilder.newClient();
-
             try {
                 try (Response response = client
                         .target(TestPortProvider.generateURL("/base/test"))
@@ -402,18 +400,6 @@ public class LRATest {
         assertEquals(completions + 1, completeCount.get());
         LRAStatus status = getStatus(new URI(lraId));
         assertTrue("LRA should have closed", status == null || status == LRAStatus.Closed);
-    }
-
-    @Test
-    public void testTimeout() throws URISyntaxException {
-        int compensations = compensateCount.get();
-        String lraId = client
-            .target(TestPortProvider.generateURL("/base/test/time-limit"))
-            .request()
-            .get(String.class);
-        assertEquals(compensations + 1, compensateCount.get());
-        LRAStatus status = getStatus(new URI(lraId));
-        assertTrue("LRA should have cancelled", status == null || status == LRAStatus.Cancelled);
     }
 
     /**
@@ -763,6 +749,18 @@ public class LRATest {
         runLRA(true);
     }
 
+    @Test
+    public void testTimeout() throws URISyntaxException {
+        int compensations = compensateCount.get();
+        String lraId = client
+                .target(TestPortProvider.generateURL("/base/test/time-limit"))
+                .request()
+                .get(String.class);
+        assertEquals(compensations + 1, compensateCount.get());
+        LRAStatus status = getStatus(new URI(lraId));
+        assertTrue("LRA should have cancelled", status == null || status == LRAStatus.Cancelled);
+    }
+
     private void runLRA(boolean cancel) {
         URI parentId = lraClient.startLRA("parent");
         URI childId = lraClient.startLRA(parentId, "child", 0L, ChronoUnit.SECONDS);
@@ -854,7 +852,7 @@ public class LRATest {
     }
 
     private void clearObjectStore() {
-        final String objectStorePath = BeanPopulator.getDefaultInstance(ObjectStoreEnvironmentBean.class).getObjectStoreDir();
+        final String objectStorePath = arjPropertyManager.getObjectStoreEnvironmentBean().getObjectStoreDir();
         final File objectStoreDirectory = new File(objectStorePath);
 
         clearDirectory(objectStoreDirectory);
