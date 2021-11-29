@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>5.12.2.Final-SNAPSHOT</version>
+    <version>5.12.5.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -45,6 +45,7 @@
     <module>jts</module>
     <module>jtax</module>
     <module>integration</module>
+    <module>integration-jakarta</module>
   </modules>
   <profiles>
       <profile>
@@ -152,6 +153,7 @@
         </activation>
         <modules>
             <module>narayana-jts-idlj</module>
+            <module>narayana-jts-idlj-jakarta</module>
         </modules>
         <build>
           <plugins>

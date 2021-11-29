@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>5.12.2.Final-SNAPSHOT</version>
+    <version>5.12.5.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -46,8 +46,10 @@
     <module>WSTX</module>
     <module>recovery</module>
     <module>bridge</module>
+    <module>bridge-jakarta</module>
     <module>sar</module>
     <module>jbossxts</module>
+    <module>jbossxts-jakarta</module>
     <module>localjunit</module>
   </modules>
     <profiles>
@@ -85,12 +87,6 @@
                 <groupId>org.jboss.spec.javax.xml.bind</groupId>
                 <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
                 <version>${version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec}</version>
-		<scope>provided</scope>
-             </dependency>
-	     <dependency>
-                <groupId>org.jboss.spec.javax.xml.ws</groupId>
-                <artifactId>jboss-jaxws-api_2.3_spec</artifactId>
-                <version>${version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.3_spec}</version>
 		<scope>provided</scope>
              </dependency>
 	     <dependency>

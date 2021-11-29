@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>5.12.2.Final-SNAPSHOT</version>
+    <version>5.12.5.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>narayana-full</artifactId>
@@ -68,6 +68,11 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.narayana.xts</groupId>
+      <artifactId>jbossxts-jakarta</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.narayana.xts</groupId>
       <artifactId>ws-c11</artifactId>
       <version>${project.version}</version>
       <classifier>war</classifier>
@@ -103,6 +108,11 @@
     <dependency>
       <groupId>org.jboss.narayana</groupId>
       <artifactId>jbosstxbridge</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.narayana</groupId>
+      <artifactId>jbosstxbridge-jakarta</artifactId>
       <version>${project.version}</version>
     </dependency>
 
