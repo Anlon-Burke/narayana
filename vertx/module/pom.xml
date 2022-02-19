@@ -30,7 +30,7 @@
   <parent>
     <groupId>org.jboss.narayana.vertx</groupId>
     <artifactId>narayana-vertx</artifactId>
-    <version>5.12.5.Final-SNAPSHOT</version>
+    <version>5.12.6.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -61,9 +61,6 @@
     <!-- The directory where the module will be assembled - you can override this on the command line
     with -Dmods.directory=mydir -->
     <mods.directory>target/mods</mods.directory>
-
-    <!--Dependency versions-->
-    <junit.version>4.11</junit.version>
 
     <!--Plugin versions-->
     <maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
@@ -117,7 +114,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
+      <version>${version.junit}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

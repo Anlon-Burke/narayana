@@ -12,6 +12,29 @@ function fatal {
   exit 1
 }
 
+function which_java {
+  type -p java 2>&1 > /dev/null
+  if [ $? = 0 ]; then
+    _java=java
+  elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
+    _java="$JAVA_HOME/bin/java"
+  else
+    unset _java
+  fi
+
+  if [[ "$_java" ]]; then
+    version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+
+    if [[ $version = 17* ]]; then
+      echo 17
+    elif [[ $version = 11* ]]; then
+      echo 11
+    elif [[ $version = 1.8* ]]; then
+      echo 8
+    fi
+  fi
+}
+
 # return 0 if using the IBM java compiler
 function is_ibm {
   jvendor=$(java -XshowSettings:properties -version 2>&1 | awk -F '"' '/java.vendor = / {print $1}')
@@ -50,7 +73,14 @@ function get_pull_xargs {
 function init_test_options {
     is_ibm
     ISIBM=$?
-    [ $NARAYANA_CURRENT_VERSION ] || NARAYANA_CURRENT_VERSION="5.12.5.Final-SNAPSHOT"
+
+    # WildFly 27 requires JDK 11 (see JBTM-3582 for details)
+    _jdk=`which_java`
+    if [[ "$_jdk" -lt 11 && "$PROFILE" =~ ^(AS_TESTS|RTS|JACOCO|XTS) ]]; then
+        fatal "Requested JDK version $_jdk cannot run with axis $PROFILE: please use jdk 11 instead"
+    fi
+
+    [ $NARAYANA_CURRENT_VERSION ] || NARAYANA_CURRENT_VERSION="5.12.6.Final-SNAPSHOT"
     [ $CODE_COVERAGE ] || CODE_COVERAGE=0
     [ x"$CODE_COVERAGE_ARGS" != "x" ] || CODE_COVERAGE_ARGS=""
     [ $ARQ_PROF ] || ARQ_PROF=arq	# IPv4 arquillian profile
@@ -123,7 +153,7 @@ function init_test_options {
         if [[ ! $PULL_DESCRIPTION_BODY == *!QA_JTA* ]]; then
           comment_on_pull "Started testing this pull request with QA_JTA profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 SUN_ORB=0 JAC_ORB=1 QA_TARGET=ci-tests-nojts JTA_AS_TESTS=0
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 SUN_ORB=0 JAC_ORB=0 QA_TARGET=ci-tests-nojts JTA_AS_TESTS=0
           export TOMCAT_TESTS=0 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -177,7 +207,7 @@ function init_test_options {
         if [[ ! $PULL_DESCRIPTION_BODY == *!DB_TESTS* ]]; then
           comment_on_pull "Started testing this pull request with DB_TESTS profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=1 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0
           export TOMCAT_TESTS=0 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -358,8 +388,8 @@ function clone_as {
     rm -rf .git/rebase-apply
   else
     echo "First time checkout of WildFly"
-    git clone git://github.com/jbosstm/jboss-as.git -o jbosstm
-    [ $? -eq 0 ] || fatal "git clone git://github.com/jbosstm/jboss-as.git failed"
+    git clone https://github.com/jbosstm/jboss-as.git -o jbosstm
+    [ $? -eq 0 ] || fatal "git clone https://github.com/jbosstm/jboss-as.git failed"
 
     cd jboss-as
 
@@ -425,37 +455,47 @@ function tests_as {
 }
 
 function download_as {
-  echo "Download WildFly Build"
+  echo "Downloading WildFly Build"
+
+  # clean up any previously downloaded zip files (this will not clean up old directories)
+  rm -f artifacts.zip wildfly-*.zip
 
   cd $WORKSPACE
-  AS_LOCATION=${AS_LOCATION:-https://ci.wildfly.org/httpAuth/repository/downloadAll/WF_Nightly/.lastSuccessful/artifacts.zip}
-  wget --user=guest --password=guest -nv ${AS_LOCATION}
-  local zipFileName=${AS_LOCATION##*/}
-  unzip -qo "$zipFileName"
-  export JBOSS_HOME=${JBOSS_HOME:-"${PWD}/${zipFileName%.zip}"}
 
-  ### The following sequence of unzipping wrapping zip files is a way how to process the WildFly nightly build ZIP structure
-  ### which is changing time to time
-  # the artifacts.zip may be wrapping several zip files: artifacts.zip -> wildfly-latest-SNAPSHOT.zip -> wildfly-###-SNAPSHOT.zip
-  local wildflyLatestZipWrapper=$(ls wildfly-latest-*.zip | head -n 1)
-  if [ -f "${wildflyLatestZipWrapper}" ]; then # wrapper zip exists, let's unzip it to proceed further to distro zip
-    unzip -qo "${wildflyLatestZipWrapper}"
-    [ $? -ne 0 ] && fatal "Cannot unzip WildFly nightly build wrapper zip file '${wildflyLatestZipWrapper}'"
-    rm -f $wildflyLatestZipWrapper
-    export JBOSS_HOME="${PWD}/${wildflyLatestZipWrapper%.zip}"
-  fi
-  # if SNAPSHOT zip still exists, unzip it further
-  local wildflyDistZip=$(ls wildfly-*-SNAPSHOT.zip | head -n 1)
-  if [ -f "${wildflyDistZip}" ]; then
-    unzip -qo "${wildflyDistZip}"
-    [ $? -ne 0 ] && fatal "Cannot unzip WildFly nightly build distribution zip file '${wildflyDistZip}'"
-    export JBOSS_HOME="${PWD}/${wildflyDistZip%.zip}"
+  if [ "$_jdk" -lt 11 ]; then
+    # download the last wildfly version that ran on Java 8
+    AS_LOCATION=${AS_LOCATION:-https://github.com/wildfly/wildfly/releases/download/26.0.1.Final/wildfly-preview-26.0.1.Final.zip}
+    wget --user=guest --password=guest -nv ${AS_LOCATION}
+    [ $? -ne 0 ] && fatal "Cannot wget WildFly '${AS_LOCATION}'"
+    zip=wildfly-preview-26.0.1.Final.zip
+  else
+    # download the latest wildfly nighly build (which we know supports Java 11)
+    AS_LOCATION=${AS_LOCATION:-https://ci.wildfly.org/httpAuth/repository/downloadAll/WF_WildflyPreviewNightly/.lastSuccessful/artifacts.zip}
+    wget --user=guest --password=guest -nv ${AS_LOCATION}
+    ### The following sequence of unzipping wrapping zip files is a way how to process the WildFly nightly build ZIP structure
+    ### which is changing time to time
+    # the artifacts.zip may be wrapping several zip files: artifacts.zip -> wildfly-latest-SNAPSHOT.zip -> wildfly-###-SNAPSHOT.zip
+    [ $? -ne 0 ] && fatal "Cannot wget WildFly '${AS_LOCATION}'"
+    unzip -j artifacts.zip wildfly-preview-latest-SNAPSHOT.zip
+    [ $? -ne 0 ] && fatal "Cannot unzip artifacts.zip"
+    unzip -qo wildfly-preview-latest-SNAPSHOT.zip
+    [ $? -ne 0 ] && fatal "Cannot unzip wildfly-preview-latest-SNAPSHOT.zip"
+    rm wildfly-preview-latest-SNAPSHOT.zip
+    zip=$(ls wildfly-preview-*-SNAPSHOT.zip) # example the current latest is wildfly-preview-27.0.0.Beta1-SNAPSHOT.zip
   fi
 
-  [ ! -d "${JBOSS_HOME}" ] && fatal "After unzipping the file '$zipFileName' (and possible zip wrapper '${wildflyDistZip}') the JBOSS_HOME directory at '${JBOSS_HOME}' does not exist"
-  # cleaning
-  rm -f artifacts.zip
-  rm -f wildfly-*.zip
+  export JBOSS_HOME=${JBOSS_HOME:-"${PWD}/${zip%.*}"}
+  rm -rf $JBOSS_HOME # clean up any previous unzip
+
+  unzip -qo $zip
+  [ $? -ne 0 ] && fatal "Cannot unzip wildfly zip file: $zip"
+
+  [ -d "${JBOSS_HOME}" ] || fatal "After unzipping the file '$zip', '${JBOSS_HOME}' does not exist"
+
+  echo JBOSS_HOME=$JBOSS_HOME
+
+  # clean up downloaded zip files
+  rm -f wildfly-*.zip artifacts.zip
 
   # init files under JBOSS_HOME before tests are started
   init_jboss_home
