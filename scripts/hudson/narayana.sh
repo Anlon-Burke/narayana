@@ -92,7 +92,7 @@ function init_test_options {
         export PERF_TESTS=0 OSGI_TESTS=0 TOMCAT_TESTS=0 LRA_TESTS=0
     elif [[ $PROFILE == "CORE" ]]; then
         if [[ ! $PULL_DESCRIPTION_BODY == *!MAIN* ]] && [[ ! $PULL_DESCRIPTION_BODY == *!CORE* ]]; then
-          comment_on_pull "Started testing this pull request with MAIN profile: $BUILD_URL"
+          comment_on_pull "Started testing this pull request with $PROFILE profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=1 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
           export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0 OSGI_TESTS=1
           export TOMCAT_TESTS=0 LRA_TESTS=0
@@ -475,13 +475,13 @@ function download_as {
     # download the last wildfly version that ran on Java 8
     AS_VERSION="26.1.0.Beta1"
     AS_LOCATION="https://github.com/wildfly/wildfly/releases/download/${AS_VERSION}/wildfly-${AS_VERSION}.zip"
-    wget --user=guest --password=guest -nv ${AS_LOCATION}
+    wget -nv ${AS_LOCATION}
     [ $? -ne 0 ] && fatal "Cannot wget WildFly '${AS_LOCATION}'"
     zip=wildfly-${AS_VERSION}.zip
   else
     # download the latest wildfly nighly build (which we know supports Java 11)
-    AS_LOCATION=${AS_LOCATION:-https://ci.wildfly.org/httpAuth/repository/downloadAll/WF_Nightly/.lastSuccessful/artifacts.zip}
-    wget --user=guest --password=guest -nv ${AS_LOCATION}
+    AS_LOCATION=${AS_LOCATION:-https://ci.wildfly.org/guestAuth/repository/downloadAll/WF_Nightly/.lastSuccessful/artifacts.zip}
+    wget -nv ${AS_LOCATION}
     ### The following sequence of unzipping wrapping zip files is a way how to process the WildFly nightly build ZIP structure
     ### which is changing time to time
     # the artifacts.zip may be wrapping several zip files: artifacts.zip -> wildfly-latest-SNAPSHOT.zip -> wildfly-###-SNAPSHOT.zip
