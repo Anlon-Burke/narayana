@@ -25,8 +25,10 @@ import com.arjuna.ats.jta.logging.jtaLogger;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.XAConnectionFactory;
+import javax.jms.XAJMSContext;
 
 /**
  * Proxy connection factory to wrap around provided {@link XAConnectionFactory}.
@@ -83,6 +85,26 @@ public class ConnectionFactoryProxy implements ConnectionFactory {
         }
 
         return connection;
+    }
+
+    @Override
+    public JMSContext createContext() {
+        return JMSContextProxy.wrapContext(xaConnectionFactory.createXAContext(), transactionHelper);
+    }
+
+    @Override
+    public JMSContext createContext(String userName, String password) {
+        return JMSContextProxy.wrapContext(xaConnectionFactory.createXAContext(userName, password), transactionHelper);
+    }
+
+    @Override
+    public JMSContext createContext(String userName, String password, int sessionMode) {
+        return JMSContextProxy.wrapContext((XAJMSContext) xaConnectionFactory.createXAContext(userName, password).createContext(sessionMode), transactionHelper);
+    }
+
+    @Override
+    public JMSContext createContext(int sessionMode) {
+        return JMSContextProxy.wrapContext((XAJMSContext) xaConnectionFactory.createXAContext().createContext(sessionMode), transactionHelper);
     }
 
 }

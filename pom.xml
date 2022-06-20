@@ -18,7 +18,7 @@
   <parent>
     <groupId>org.jboss</groupId>
     <artifactId>jboss-parent</artifactId>
-    <version>35</version>
+    <version>39</version>
   </parent>
   <groupId>org.jboss.narayana</groupId>
   <artifactId>narayana-all</artifactId>
@@ -196,6 +196,7 @@
     <version.com.sun.jersey>1.9.1</version.com.sun.jersey>
     <version.com.sybase.jConnect>6.0</version.com.sybase.jConnect>
     <version.commons-httpclient>3.1-jbossorg-1</version.commons-httpclient>
+    <version.compiler.plugin>3.8.0-jboss-2</version.compiler.plugin>
     <version.dom4j>1.6.1</version.dom4j>
     <version.doxia>1.8.1</version.doxia>
     <version.fasterxml.jackson>2.12.3</version.fasterxml.jackson>
@@ -205,11 +206,13 @@
     <version.io.narayana.checkstyle-config>1.0.1.Final</version.io.narayana.checkstyle-config>
     <version.jacorb>2.3.1jboss.patch01-brew</version.jacorb>
     <version.jakarta.json-api>1.1.6</version.jakarta.json-api>
+    <version.javadoc.plugin>3.0.1</version.javadoc.plugin>
     <version.javax.annotation>1.2</version.javax.annotation>
     <version.javax.enterprise>2.0</version.javax.enterprise>
     <version.javax.inject>1</version.javax.inject>
     <version.javax.javaee-api>7.0</version.javax.javaee-api>
     <version.javax.ws.rs-api>2.0.1.Final</version.javax.ws.rs-api>
+    <version.jaxws-ri>2.3.5</version.jaxws-ri>
     <version.jfree>1.0.9</version.jfree>
     <version.jnpserver>5.0.3.GA</version.jnpserver>
     <version.junit>4.13.1</version.junit>

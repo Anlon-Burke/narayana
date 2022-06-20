@@ -46,6 +46,7 @@ public class ConnectionProxy implements Connection {
     private final XAConnection xaConnection;
 
     private final TransactionHelper transactionHelper;
+    private boolean connectionCloseScheduled;
 
     /**
      * @param xaConnection XA connection which needs to be proxied.
@@ -65,11 +66,38 @@ public class ConnectionProxy implements Connection {
      */
     @Override
     public Session createSession(boolean transacted, int acknowledgeMode) throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         if (transactionHelper.isTransactionAvailable()) {
             return createAndRegisterSession();
         }
 
         return xaConnection.createSession(transacted, acknowledgeMode);
+    }
+
+    @Override
+    public Session createSession(int sessionMode) throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
+        if (transactionHelper.isTransactionAvailable()) {
+            return createAndRegisterSession();
+        }
+
+        return xaConnection.createSession(sessionMode);
+    }
+
+    @Override
+    public Session createSession() throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
+        if (transactionHelper.isTransactionAvailable()) {
+            return createAndRegisterSession();
+        }
+
+        return xaConnection.createSession();
     }
 
     /**
@@ -81,7 +109,11 @@ public class ConnectionProxy implements Connection {
      */
     @Override
     public void close() throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         if (transactionHelper.isTransactionAvailable()) {
+            connectionCloseScheduled = true;
             Synchronization synchronization = new ConnectionClosingSynchronization(xaConnection);
             transactionHelper.registerSynchronization(synchronization);
 
@@ -100,6 +132,9 @@ public class ConnectionProxy implements Connection {
      */
     @Override
     public String getClientID() throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         return xaConnection.getClientID();
     }
 
@@ -108,6 +143,9 @@ public class ConnectionProxy implements Connection {
      */
     @Override
     public void setClientID(String clientID) throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         xaConnection.setClientID(clientID);
     }
 
@@ -118,6 +156,9 @@ public class ConnectionProxy implements Connection {
      */
     @Override
     public ConnectionMetaData getMetaData() throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         return xaConnection.getMetaData();
     }
 
@@ -128,6 +169,9 @@ public class ConnectionProxy implements Connection {
      */
     @Override
     public ExceptionListener getExceptionListener() throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         return xaConnection.getExceptionListener();
     }
 
@@ -138,6 +182,9 @@ public class ConnectionProxy implements Connection {
      */
     @Override
     public void setExceptionListener(ExceptionListener listener) throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         xaConnection.setExceptionListener(listener);
     }
 
@@ -148,6 +195,9 @@ public class ConnectionProxy implements Connection {
      */
     @Override
     public void start() throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         xaConnection.start();
     }
 
@@ -158,6 +208,9 @@ public class ConnectionProxy implements Connection {
      */
     @Override
     public void stop() throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         xaConnection.stop();
     }
 
@@ -169,7 +222,18 @@ public class ConnectionProxy implements Connection {
     @Override
     public ConnectionConsumer createConnectionConsumer(Destination destination, String messageSelector,
             ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         return xaConnection.createConnectionConsumer(destination, messageSelector, sessionPool, maxMessages);
+    }
+
+    @Override
+    public ConnectionConsumer createSharedConnectionConsumer(Topic topic, String subscriptionName, String messageSelector, ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
+        return xaConnection.createSharedConnectionConsumer(topic, subscriptionName, messageSelector, sessionPool, maxMessages);
     }
 
     /**
@@ -180,7 +244,18 @@ public class ConnectionProxy implements Connection {
     @Override
     public ConnectionConsumer createDurableConnectionConsumer(Topic topic, String subscriptionName, String messageSelector,
             ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
         return xaConnection.createDurableConnectionConsumer(topic, subscriptionName, messageSelector, sessionPool, maxMessages);
+    }
+
+    @Override
+    public ConnectionConsumer createSharedDurableConnectionConsumer(Topic topic, String subscriptionName, String messageSelector, ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+        if (connectionCloseScheduled) {
+            throw new RuntimeException("Connection is already scheduled to be closed");
+        }
+        return xaConnection.createSharedDurableConnectionConsumer(topic, subscriptionName, messageSelector, sessionPool, maxMessages);
     }
 
     /**
