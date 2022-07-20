@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>5.12.7.Final-SNAPSHOT</version>
+    <version>5.12.8.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>narayana-full</artifactId>
@@ -148,12 +148,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>jacorb</groupId>
-      <artifactId>jacorb</artifactId>
-      <version>${version.jacorb}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.ws</groupId>
       <artifactId>jbossws-api</artifactId>
       <version>${version.org.jboss.ws}</version>
@@ -249,6 +243,51 @@
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jboss.spec.javax.xml.bind</groupId>
+      <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
+      <version>${version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.spec.javax.xml.ws</groupId>
+      <artifactId>jboss-jaxws-api_2.3_spec</artifactId>
+      <version>${version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.3_spec}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.ws</groupId>
+      <artifactId>jaxws-ri</artifactId>
+      <version>${version.jaxws-ri}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-impl</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-xjc</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.xml.ws</groupId>
+          <artifactId>policy</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.xml.stream.buffer</groupId>
+          <artifactId>streambuffer</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jvnet.staxex</groupId>
+          <artifactId>stax-ex</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
   </dependencies>
 
   <build>
@@ -288,25 +327,10 @@
 
   <profiles>
     <profile>
-      <id>jts-jacorb</id>
-      <activation>
-        <property>
-          <name>!jacorb-disabled</name>
-        </property>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.jboss.narayana.jts</groupId>
-          <artifactId>narayana-jts-jacorb</artifactId>
-          <version>${project.version}</version>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
       <id>jts-idlj</id>
       <activation>
         <property>
-          <name>!idlj-disabled</name>
+          <name>!openjdk-disabled</name>
         </property>
       </activation>
 
@@ -314,11 +338,6 @@
         <dependency>
           <groupId>org.jboss.narayana.jts</groupId>
           <artifactId>narayana-jts-idlj</artifactId>
-          <version>${project.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.jboss.narayana.jts</groupId>
-          <artifactId>idlj-idl</artifactId>
           <version>${project.version}</version>
         </dependency>
       </dependencies>
@@ -412,6 +431,7 @@
                   </additionalJOptions>
                   <dependencySourceExcludes>
                     <dependencySourceExclude>javax.enterprise:cdi-api</dependencySourceExclude>
+                    <dependencySourceExclude>org.jboss.spec.javax.xml.bind:jboss-jaxb-api_2.3_spec</dependencySourceExclude>
                   </dependencySourceExcludes>
                 </configuration>
               </execution>
@@ -458,64 +478,6 @@
           <artifactId>wrapper</artifactId>
           <version>${version.tanukisoft}</version>
           <scope>provided</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>jdk9+</id>
-      <activation>
-        <jdk>[9,)</jdk>
-      </activation>
-      <properties>
-        <jvm.args.modular>--add-modules=java.se</jvm.args.modular>
-        <version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec>1.0.1.Final</version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec>
-        <version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.3_spec>1.0.0.Final</version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.3_spec>
-      </properties>
-      <dependencies>
-        <dependency>
-          <groupId>org.jboss.spec.javax.xml.bind</groupId>
-          <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-          <version>${version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec}</version>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.jboss.spec.javax.xml.ws</groupId>
-          <artifactId>jboss-jaxws-api_2.3_spec</artifactId>
-          <version>${version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.3_spec}</version>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>com.sun.xml.ws</groupId>
-          <artifactId>jaxws-ri</artifactId>
-          <version>${version.jaxws-ri}</version>
-          <type>pom</type>
-          <scope>provided</scope>
-          <exclusions>
-            <exclusion>
-              <groupId>com.sun.xml.bind</groupId>
-              <artifactId>jaxb-core</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>com.sun.xml.bind</groupId>
-              <artifactId>jaxb-impl</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>com.sun.xml.bind</groupId>
-              <artifactId>jaxb-xjc</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>com.sun.xml.ws</groupId>
-              <artifactId>policy</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>com.sun.xml.stream.buffer</groupId>
-              <artifactId>streambuffer</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>org.jvnet.staxex</groupId>
-              <artifactId>stax-ex</artifactId>
-            </exclusion>
-          </exclusions>
         </dependency>
       </dependencies>
     </profile>

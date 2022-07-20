@@ -29,8 +29,6 @@ function which_java {
       echo 17
     elif [[ $version = 11* ]]; then
       echo 11
-    elif [[ $version = 1.8* ]]; then
-      echo 8
     fi
   fi
 }
@@ -76,8 +74,11 @@ function init_test_options {
 
     # WildFly 27 requires JDK 11 (see JBTM-3582 for details)
     _jdk=`which_java`
+    if [ "$_jdk" -lt 11 ]; then
+      fatal "Narayana does not support JDKs less than 11"
+    fi
 
-    [ $NARAYANA_CURRENT_VERSION ] || NARAYANA_CURRENT_VERSION="5.12.7.Final-SNAPSHOT"
+    [ $NARAYANA_CURRENT_VERSION ] || NARAYANA_CURRENT_VERSION="5.12.8.Final-SNAPSHOT"
     [ $CODE_COVERAGE ] || CODE_COVERAGE=0
     [ x"$CODE_COVERAGE_ARGS" != "x" ] || CODE_COVERAGE_ARGS=""
     [ $ARQ_PROF ] || ARQ_PROF=arq	# IPv4 arquillian profile
@@ -88,13 +89,13 @@ function init_test_options {
         echo "SKIPPING PROFILE=$PROFILE"
         export COMMENT_ON_PULL=""
         export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=0 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-        export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 SUN_ORB=0 OPENJDK_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0
+        export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 OPENJDK_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0
         export PERF_TESTS=0 OSGI_TESTS=0 TOMCAT_TESTS=0 LRA_TESTS=0
     elif [[ $PROFILE == "CORE" ]]; then
         if [[ ! $PULL_DESCRIPTION_BODY == *!MAIN* ]] && [[ ! $PULL_DESCRIPTION_BODY == *!CORE* ]]; then
           comment_on_pull "Started testing this pull request with $PROFILE profile: $BUILD_URL"
-          export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=1 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0 OSGI_TESTS=1
+          export AS_BUILD=1 AS_CLONE=1 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=1 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=1 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=1 OSGI_TESTS=1
           export TOMCAT_TESTS=0 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -104,7 +105,7 @@ function init_test_options {
           comment_on_pull "Started testing this pull request with $PROFILE profile: $BUILD_URL"
           [ -z $NARAYANA_BUILD ] && NARAYANA_BUILD=1
           export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0 OSGI_TESTS=0
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0 OSGI_TESTS=0
           export TOMCAT_TESTS=1 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -116,7 +117,7 @@ function init_test_options {
           fi
           comment_on_pull "Started testing this pull request with $PROFILE profile: $BUILD_URL"
           export AS_BUILD=1 AS_CLONE=1 AS_DOWNLOAD=0 AS_TESTS=1 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=1 QA_TESTS=0 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=1 OSGI_TESTS=0
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0 OSGI_TESTS=0
           export TOMCAT_TESTS=0 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -128,7 +129,7 @@ function init_test_options {
           fi
           comment_on_pull "Started testing this pull request with RTS profile: $BUILD_URL"
           export AS_BUILD=1 AS_CLONE=1 AS_DOWNLOAD=0 AS_TEST=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=1 RTS_TESTS=1 JTA_CDI_TESTS=0 QA_TESTS=0 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0 OSGI_TESTS=0
+          export RTS_AS_TESTS=1 RTS_TESTS=1 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0 OSGI_TESTS=0
           export TOMCAT_TESTS=0 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -140,7 +141,7 @@ function init_test_options {
           fi
           comment_on_pull "Started testing this pull request with JACOCO profile: $BUILD_URL"
           export AS_BUILD=1 AS_CLONE=1 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=1 XTS_AS_TESTS=0 XTS_TESTS=1 TXF_TESTS=1 txbridge=1
-          export RTS_AS_TESTS=0 RTS_TESTS=1 JTA_CDI_TESTS=1 QA_TESTS=1 SUN_ORB=1 JAC_ORB=0 JTA_AS_TESTS=1 OSGI_TESTS=0
+          export RTS_AS_TESTS=0 RTS_TESTS=1 JTA_CDI_TESTS=1 QA_TESTS=1 JAC_ORB=0 JTA_AS_TESTS=1 OSGI_TESTS=0
           export TOMCAT_TESTS=1 LRA_TESTS=0 CODE_COVERAGE=1 CODE_COVERAGE_ARGS="-PcodeCoverage -Pfindbugs"
           [ -z ${MAVEN_OPTS+x} ] && export MAVEN_OPTS="-Xms2048m -Xmx2048m"
         else
@@ -153,7 +154,7 @@ function init_test_options {
           fi
           comment_on_pull "Started testing this pull request with XTS profile: $BUILD_URL"
           export AS_BUILD=1 AS_CLONE=1 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=1 XTS_TESTS=1 TXF_TESTS=1 txbridge=1
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0
           export TOMCAT_TESTS=0 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -162,25 +163,7 @@ function init_test_options {
         if [[ ! $PULL_DESCRIPTION_BODY == *!QA_JTA* ]]; then
           comment_on_pull "Started testing this pull request with QA_JTA profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 SUN_ORB=0 JAC_ORB=0 QA_TARGET=ci-tests-nojts JTA_AS_TESTS=0
-          export TOMCAT_TESTS=0 LRA_TESTS=0
-        else
-          export COMMENT_ON_PULL=""
-        fi
-    elif [[ $PROFILE == "QA_JTS_JACORB" ]]; then
-        if [[ ! $PULL_DESCRIPTION_BODY == *!QA_JTS_JACORB* ]]; then
-          comment_on_pull "Started testing this pull request with QA_JTS_JACORB profile: $BUILD_URL"
-          export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=0 SUN_ORB=0 JAC_ORB=1 QA_TARGET=ci-jts-tests JTA_AS_TESTS=0
-          export TOMCAT_TESTS=0 LRA_TESTS=0
-        else
-          export COMMENT_ON_PULL=""
-        fi
-    elif [[ $PROFILE == "QA_JTS_JDKORB" ]]; then
-        if [[ ! $PULL_DESCRIPTION_BODY == *!QA_JTS_JDKORB* ]]; then
-          comment_on_pull "Started testing this pull request with QA_JTS_JDKORB profile: $BUILD_URL"
-          export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1  NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=0 SUN_ORB=1 JAC_ORB=0 QA_TARGET=ci-jts-tests JTA_AS_TESTS=0
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 JAC_ORB=0 QA_TARGET=ci-tests-nojts JTA_AS_TESTS=0
           export TOMCAT_TESTS=0 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -189,7 +172,7 @@ function init_test_options {
         if [[ ! $PULL_DESCRIPTION_BODY == *!QA_JTS_OPENJDKORB* ]]; then
           comment_on_pull "Started testing this pull request with QA_JTS_OPENJDKORB profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1  NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 SUN_ORB=0 JAC_ORB=0 QA_TARGET=ci-jts-tests
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 JAC_ORB=0 QA_TARGET=ci-jts-tests
           export JTA_AS_TESTS=0 TOMCAT_TESTS=0 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -198,7 +181,7 @@ function init_test_options {
         if [[ ! $PULL_DESCRIPTION_BODY == *!PERF* ]]; then
           comment_on_pull "Started testing this pull request with PERF profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0 OSGI_TESTS=0 PERF_TESTS=1
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0 OSGI_TESTS=0 PERF_TESTS=1
           export TOMCAT_TESTS=0 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -207,7 +190,7 @@ function init_test_options {
         if [[ ! $PULL_DESCRIPTION_BODY == *!LRA* ]]; then
           comment_on_pull "Started testing this pull request with LRA profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=1 AS_TESTS=0 NARAYANA_BUILD=0 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0
           export TOMCAT_TESTS=0 LRA_TESTS=1
         else
           export COMMENT_ON_PULL=""
@@ -216,7 +199,7 @@ function init_test_options {
         if [[ ! $PULL_DESCRIPTION_BODY == *!DB_TESTS* ]]; then
           comment_on_pull "Started testing this pull request with DB_TESTS profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_DOWNLOAD=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=1 XTS_AS_TESTS=0 XTS_TESTS=0 TXF_TESTS=0 txbridge=0
-          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 SUN_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0
+          export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 JAC_ORB=0 JTA_AS_TESTS=0
           export TOMCAT_TESTS=0 LRA_TESTS=0
         else
           export COMMENT_ON_PULL=""
@@ -242,12 +225,10 @@ function init_test_options {
     [ $JTA_CDI_TESTS ] || JTA_CDI_TESTS=0 # JTA CDI Tests
     [ $JTA_AS_TESTS ] || JTA_AS_TESTS=0 # JTA AS tests
     [ $QA_TESTS ] || QA_TESTS=0 # QA test suite
-    [ $SUN_ORB ] || SUN_ORB=0 # Run QA test suite against the Sun orb
     [ $OPENJDK_ORB ] || OPENJDK_ORB=0 # Run QA test suite against the openjdk orb
-    [ $JAC_ORB ] || JAC_ORB=0 # Run QA test suite against JacORB
     [ $txbridge ] || txbridge=0 # bridge tests
     [ $PERF_TESTS ] || PERF_TESTS=0 # benchmarks
-    [ $REDUCE_SPACE ] || REDUCE_SPACE=1 # Whether to reduce the space used
+    [ $REDUCE_SPACE ] || REDUCE_SPACE=0 # Whether to reduce the space used
 
     get_pull_xargs "$PULL_DESCRIPTION_BODY" $PROFILE # see if the PR description overrides any of the defaults
 
@@ -358,7 +339,7 @@ function build_narayana {
   [ $NARAYANA_TESTS = 1 ] && NARAYANA_ARGS= || NARAYANA_ARGS="-DskipTests"
 
   if [ $IBM_ORB = 1 ]; then
-    ORBARG="-Dibmorb-enabled -Djacorb-disabled -Didlj-disabled -Dopenjdk-disabled"
+    ORBARG="-Dibmorb-enabled -Didlj-disabled -Dopenjdk-disabled"
     ${JAVA_HOME}/bin/java -version 2>&1 | grep IBM
     [ $? -eq 0 ] || fatal "You must use the IBM jdk to build with ibmorb"
   fi
@@ -392,7 +373,7 @@ function clone_as {
     git reset --hard jbosstm/5_BRANCH
     [ $? -eq 0 ] || fatal "git reset 5_BRANCH failed"
     git clean -f -d -x
-    [ $? -gt 1 ] || fatal "git clean failed"
+    [ $? -eq 0 ] || fatal "git clean failed"
     git rebase --abort
     rm -rf .git/rebase-apply
   else
@@ -418,7 +399,7 @@ function clone_as {
   echo $(git rev-parse HEAD)
 
   echo "Rebasing the wildfly upstream/main on top of the AS_BRANCH $AS_BRANCH"
-  git pull --rebase --ff-only upstream main
+  git pull --rebase upstream main
   [ $? -eq 0 ] || fatal "git rebase failed"
 
   if [ $REDUCE_SPACE = 1 ]; then
@@ -435,8 +416,9 @@ function build_as {
   cd $WORKSPACE/jboss-as
 
   # building WildFly
-  export MAVEN_OPTS="-XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC $MAVEN_OPTS"
-  JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MaxPermSize=512m $JAVA_OPTS" ./build.sh clean install -B -DskipTests -Dts.smoke=false $IPV6_OPTS -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@"
+  [ "$_jdk" -lt 17 ] && export MAVEN_OPTS="-XX:MaxMetaspaceSize=512m -XX:+UseConcMarkSweepGC $MAVEN_OPTS"
+  [ "$_jdk" -ge 17 ] && export MAVEN_OPTS="-XX:MaxMetaspaceSize=512m $MAVEN_OPTS"
+  JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MaxMetaspaceSize=512m $JAVA_OPTS" ./build.sh clean install -B -DskipTests -Dts.smoke=false $IPV6_OPTS -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@"
   [ $? -eq 0 ] || fatal "AS build failed"
 
   WILDFLY_VERSION_FROM_JBOSS_AS=`awk '/wildfly-parent/ { while(!/<version>/) {getline;} print; }' ${WORKSPACE}/jboss-as/pom.xml | cut -d \< -f 2|cut -d \> -f 2`
@@ -458,7 +440,7 @@ function tests_as {
   fi
 
   cd "${WORKSPACE}/jboss-as"
-  JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MaxPermSize=512m $JAVA_OPTS" ./integration-tests.sh -B $IPV6_OPTS -Dtimeout.factor=300 -Dsurefire.forked.process.timeout=12000 -Dsurefire.extra.args='-Xmx512m' -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} -Djboss.dist="$JBOSS_HOME" -DallTests=true -fae "$@" clean verify
+  JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MaxMetaspaceSize=512m $JAVA_OPTS" ./integration-tests.sh -B $IPV6_OPTS -Dtimeout.factor=300 -Dsurefire.forked.process.timeout=12000 -Dsurefire.extra.args='-Xmx512m' -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} -Djboss.dist="$JBOSS_HOME" -DallTests=true -fae "$@" clean verify
   [ $? -eq 0 ] || fatal "AS tests failed"
   cd $WORKSPACE
 }
@@ -471,28 +453,19 @@ function download_as {
   # clean up any previously downloaded zip files (this will not clean up old directories)
   rm -f artifacts.zip wildfly-*.zip
 
-  if [ "$_jdk" -lt 11 ]; then
-    # download the last wildfly version that ran on Java 8
-    AS_VERSION="26.1.0.Beta1"
-    AS_LOCATION="https://github.com/wildfly/wildfly/releases/download/${AS_VERSION}/wildfly-${AS_VERSION}.zip"
-    wget -nv ${AS_LOCATION}
-    [ $? -ne 0 ] && fatal "Cannot wget WildFly '${AS_LOCATION}'"
-    zip=wildfly-${AS_VERSION}.zip
-  else
-    # download the latest wildfly nighly build (which we know supports Java 11)
-    AS_LOCATION=${AS_LOCATION:-https://ci.wildfly.org/guestAuth/repository/downloadAll/WF_Nightly/.lastSuccessful/artifacts.zip}
-    wget -nv ${AS_LOCATION}
-    ### The following sequence of unzipping wrapping zip files is a way how to process the WildFly nightly build ZIP structure
-    ### which is changing time to time
-    # the artifacts.zip may be wrapping several zip files: artifacts.zip -> wildfly-latest-SNAPSHOT.zip -> wildfly-###-SNAPSHOT.zip
-    [ $? -ne 0 ] && fatal "Cannot wget WildFly '${AS_LOCATION}'"
-    unzip -j artifacts.zip wildfly-latest-SNAPSHOT.zip
-    [ $? -ne 0 ] && fatal "Cannot unzip artifacts.zip"
-    unzip -qo wildfly-latest-SNAPSHOT.zip
-    [ $? -ne 0 ] && fatal "Cannot unzip wildfly-latest-SNAPSHOT.zip"
-    rm wildfly-latest-SNAPSHOT.zip
-    zip=$(ls wildfly-*-SNAPSHOT.zip) # example the current latest is wildfly-preview-27.0.0.Beta1-SNAPSHOT.zip
-  fi
+  # download the latest wildfly nighly build (which we know supports Java 11)
+  AS_LOCATION=${AS_LOCATION:-https://ci.wildfly.org/guestAuth/repository/downloadAll/WF_Nightly/.lastSuccessful/artifacts.zip}
+  wget -nv ${AS_LOCATION}
+  ### The following sequence of unzipping wrapping zip files is a way how to process the WildFly nightly build ZIP structure
+  ### which is changing time to time
+  # the artifacts.zip may be wrapping several zip files: artifacts.zip -> wildfly-latest-SNAPSHOT.zip -> wildfly-###-SNAPSHOT.zip
+  [ $? -ne 0 ] && fatal "Cannot wget WildFly '${AS_LOCATION}'"
+  unzip -j artifacts.zip wildfly-latest-SNAPSHOT.zip
+  [ $? -ne 0 ] && fatal "Cannot unzip artifacts.zip"
+  unzip -qo wildfly-latest-SNAPSHOT.zip
+  [ $? -ne 0 ] && fatal "Cannot unzip wildfly-latest-SNAPSHOT.zip"
+  rm wildfly-latest-SNAPSHOT.zip
+  zip=$(ls wildfly-*-SNAPSHOT.zip) # example the current latest is wildfly-preview-27.0.0.Beta1-SNAPSHOT.zip
 
   export JBOSS_HOME=${JBOSS_HOME:-"${PWD}/${zip%.*}"}
   rm -rf $JBOSS_HOME # clean up any previous unzip
@@ -552,7 +525,7 @@ function rts_as_tests {
 function jta_as_tests {
   echo "#-1. JTA AS Integration Test"
   cp ArjunaJTA/jta/src/test/resources/standalone-cmr.xml ${JBOSS_HOME}/standalone/configuration/
-  ./build.sh -f ArjunaJTA/jta/pom.xml -fae -B -Parq $CODE_COVERAGE_ARGS "$@" test
+  ./build.sh -f ArjunaJTA/jta/pom.xml -fae -B -DarqProfileActivated=true $CODE_COVERAGE_ARGS "$@" test
   [ $? -eq 0 ] || fatal "JTA AS Integration Test failed"
   cd ${WORKSPACE}
 }
@@ -774,15 +747,13 @@ function qa_tests_once {
   cp TaskImpl.properties.template TaskImpl.properties
 
   # check to see which orb we are running against:
-  if [ x$orb = x"openjdk" ]; then
-    orbtype=openjdk
-  elif [ x$orb = x"idlj" ]; then
-    orbtype=idlj
-  elif [ x$orb = x"ibmorb" ]; then
+  if [ x$orb = x"ibmorb" ]; then
     orbtype=ibmorb
 	sed -e "s#^  dist#  ${JAVA_HOME}\${file.separator}jre\${file.separator}lib\${file.separator}ibmorb.jar\\\\\\n  \${path.separator}${JAVA_HOME}\${file.separator}jre\${file.separator}lib\${file.separator}ibmorb.jar\\\\\\n  \${path.separator}dist#" TaskImpl.properties > "TaskImpl.properties.tmp" && mv "TaskImpl.properties.tmp" "TaskImpl.properties"
+  elif [ x$orb = x"openjdk" ]; then
+    orbtype=openjdk
   else
-    orbtype=jacorb
+    fatal "Narayana does not support the specified ORB. Supported ORBs are: ibmorb and openjdk"
   fi
 
   testoutputzip="testoutput-${orbtype}.zip"
@@ -790,26 +761,9 @@ function qa_tests_once {
   sed -e "s#^COMMAND_LINE_0=.*#COMMAND_LINE_0=${JAVA_HOME}/bin/java#" TaskImpl.properties > "TaskImpl.properties.tmp" && mv "TaskImpl.properties.tmp" "TaskImpl.properties"
   [ $? -eq 0 ] || fatal "sed TaskImpl.properties failed"
 
-  # store the origin orbtype
-  origin_orbtype=orbtype
-
-  if [ $orbtype = "openjdk" ]; then
-    openjdkjar="dist/narayana-full-${NARAYANA_CURRENT_VERSION}/lib/ext/openjdk-orb.jar"
-    if [ $JAVA_VERSION -lt "9" ]; then
-        EXTRA_QA_SYSTEM_PROPERTIES="-Xbootclasspath/p:$openjdkjar $EXTRA_QA_SYSTEM_PROPERTIES"
-    fi
-
-    if [ $JAVA_VERSION -lt "11" ]; then
-        orbtype="idlj"
-    fi
-  fi
-
   if [[ x"$EXTRA_QA_SYSTEM_PROPERTIES" != "x" ]]; then
     add_qa_xargs "$EXTRA_QA_SYSTEM_PROPERTIES"
   fi
-
-  # delete lines containing jacorb
-  [ $orbtype != "jacorb" ] && sed -e  '/^.*separator}jacorb/ d' TaskImpl.properties > "TaskImpl.properties.tmp" && mv "TaskImpl.properties.tmp" "TaskImpl.properties"
 
   # if the env variable MFACTOR is set then set the bean property CoreEnvironmentBean.timeoutFactor
   if [[ -n "$MFACTOR" ]] ; then
@@ -825,26 +779,12 @@ function qa_tests_once {
 
   [ $? -eq 0 ] || fatal "qa build failed"
 
-  # restore the orbtype if the jdk >= 9
-  if [ $JAVA_VERSION -ge "9" ]; then
-    orbtype="${origin_orbtype}"
-  fi
-
-  if [ $orbtype = "jacorb" ]; then
-    sed -e "s#^jacorb.log.default.verbosity=.*#jacorb.log.default.verbosity=2#"   dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties > "dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties.tmp" && mv "dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties.tmp" "dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties"
-    sed -e "s#^jacorb.poa.thread_pool_max=.*#jacorb.poa.thread_pool_max=100#"   dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties > "dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties.tmp" && mv "dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties.tmp" "dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties"
-    sed -e "s#^jacorb.poa.thread_pool_min=.*#jacorb.poa.thread_pool_min=40#"   dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties > "dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties.tmp" && mv "dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties.tmp" "dist/narayana-full-${NARAYANA_CURRENT_VERSION}/jacorb/etc/jacorb.properties"
-  fi
-
   if [[ $# == 0 || $# > 0 && "$1" != "-DskipTests" ]]; then
     # determine which QA test target to call
     target="ci-tests" # the default is to run everything (ci-tests)
 
     # if IPV6_OPTS is set then do not do the jdbc tests (ie run target junit-testsuite)
     [ -z "${IPV6_OPTS+x}" ] || target="junit"
-
-    # if called with the sun or ibm orbs then only run the jtsremote tests
-    [ $orbtype != "jacorb" ] && target="ci-jts-tests"
 
     # QA_TARGET overrides the previous settings
     [ x$QA_TARGET = x ] || target=$QA_TARGET # the caller can force the build to run a specific target
@@ -900,40 +840,26 @@ function qa_tests_once {
 }
 
 function qa_tests {
-  ok1=0;
-  ok2=0;
-  ok3=0;
-  ok4=0;
-
-  # if the jdk >= 11, we do not run with the sun orb since it has been removed
-  if [ $JAVA_VERSION -ge "11" ]; then
-	  SUN_ORB=0;
-  fi
+  ibm_orb_tests_ok=0;
+  openjdk_orb_tests_ok=0;
 
   if [ $IBM_ORB = 1 ]; then
+    if [ $JAVA_VERSION -eq "17" ] ; then
+        echo "IBM ORB execution failed on JDK17, please check https://issues.redhat.com/browse/JBTM-3600 for more info."
+        exit -1
+    fi
     qa_tests_once "orb=ibmorb" "$@" # run qa against the IBM orb
-    ok3=$?
+    ibm_orb_tests_ok=$?
   else
-    if [ $SUN_ORB = 1 ]; then
-      qa_tests_once "orb=idlj" "$@" # run qa against the Sun orb
-      ok2=$?
-    fi
-    if [ $JAC_ORB = 1 ]; then
-      qa_tests_once "orb=jacorb" "$@"    # run qa against the default orb
-      ok1=$?
-    fi
-    if [ $OPENJDK_ORB = 1 ]; then
-      qa_tests_once "orb=openjdk" "$@"    # run qa against the openjdk orb
-      ok4=$?
-    fi
+    # OPENJDK_ORB #
+    qa_tests_once "orb=openjdk" "$@"    # run qa against the openjdk orb
+    openjdk_orb_tests_ok=$?
   fi
 
-  [ $ok1 = 0 ] || echo some jacorb QA tests failed
-  [ $ok2 = 0 ] || echo some Sun ORB QA tests failed
-  [ $ok3 = 0 ] || echo some IBM ORB QA tests failed
-  [ $ok4 = 0 ] || echo some openjdk ORB QA tests failed
+  [ $ibm_orb_tests_ok = 0 ] || echo some IBM ORB QA tests failed
+  [ $openjdk_orb_tests_ok = 0 ] || echo some openjdk ORB QA tests failed
 
-  [ $ok1 = 0 -a $ok2 = 0 -a $ok3 = 0 -a $ok4 = 0 ] || fatal "some qa tests failed"
+  [ $openjdk_orb_tests_ok = 0 -a $ibm_orb_tests_ok = 0 ] || fatal "some qa tests failed"
 }
 
 function hw_spec {

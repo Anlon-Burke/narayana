@@ -19,7 +19,7 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>5.12.7.Final-SNAPSHOT</version>
+    <version>5.12.8.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -31,7 +31,6 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   <url>http://www.jboss.org/jbosstm</url>
 
   <properties>
-    <version.quarkus>1.8.3.Final</version.quarkus>
     <version.resteasy-client>${version.org.jboss.resteasy}</version.resteasy-client>
 
     <version.json.api>1.1</version.json.api>
@@ -42,11 +41,19 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 
     <version.narayana>${project.version}</version.narayana>
 
-    <maven.compiler.source>1.8</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <sortpom.skip>true</sortpom.skip>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jboss.spec.javax.xml.bind</groupId>
+      <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
+      <version>${version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -77,24 +84,6 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
         </plugins>
       </build>
     </profile>
-    <profile>
-	  <id>jdk11</id>
-        <activation>
-          <jdk>[11,)</jdk>
-        </activation>
-        <properties>
-          <jvm.args.modular>--add-modules=java.se</jvm.args.modular>
-	      <version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec>1.0.1.Final</version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec>
-	    </properties>
-	    <dependencies>
-          <dependency>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-            <version>${version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec}</version>
-            <scope>provided</scope>
-          </dependency>
-	    </dependencies>
-      </profile>
       <profile>
         <id>community</id>
         <modules>

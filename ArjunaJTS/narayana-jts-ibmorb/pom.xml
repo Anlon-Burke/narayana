@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.jboss.narayana.jts</groupId>
     <artifactId>narayana-jts-all</artifactId>
-    <version>5.12.7.Final-SNAPSHOT</version>
+    <version>5.12.8.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -236,23 +236,11 @@
       <groupId>org.jboss.narayana.jts</groupId>
       <artifactId>orbportability</artifactId>
       <version>${project.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.narayana.jts</groupId>
-            <artifactId>jacorb-idl</artifactId>
-          </exclusion>
-        </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jboss.narayana.jts</groupId>
       <artifactId>jts</artifactId>
       <version>${project.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.narayana.jts</groupId>
-            <artifactId>jacorb-idl</artifactId>
-          </exclusion>
-        </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jboss.narayana.jts</groupId>
@@ -263,12 +251,6 @@
       <groupId>org.jboss.narayana.jts</groupId>
       <artifactId>jtax</artifactId>
       <version>${project.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.narayana.jts</groupId>
-            <artifactId>jacorb-idl</artifactId>
-          </exclusion>
-        </exclusions>
     </dependency>
 <!--
     <dependency>

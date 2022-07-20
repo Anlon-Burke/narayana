@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.jboss.narayana.jts</groupId>
     <artifactId>narayana-jts-all</artifactId>
-    <version>5.12.7.Final-SNAPSHOT</version>
+    <version>5.12.8.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>narayana-jts-integration-jakarta</artifactId>
@@ -131,23 +131,6 @@
   </build>
 
   <profiles>
-    <profile>
-      <id>not-j9</id>
-      <activation>
-        <jdk>[1.7,1.9)</jdk>
-      </activation>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.jboss.narayana.jts</groupId>
-          <!-- do the other profiles generate an idlj-idl-tests artifact -->
-          <artifactId>idlj-idl-tests</artifactId>
-          <version>${project.version}</version>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-
     <profile>
       <id>release</id>
       <build>

@@ -25,10 +25,7 @@ https://developer.jboss.org/wiki/PerformanceGatesForAcceptingPerformanceFixesInN
 
 Requirements
 ------------
-To build this project you will need a JDK (Java Development Kit) with a minimum version of 1.8.
-Note that it is not sufficient to use a JRE because the build requires access to an IDL compiler so ensure
-that the JAVA_HOME environment variable is set correctly and ensure that the JDK bin directory is included in the
-PATH environment variable.
+To build this project you will need a JDK (Java Development Kit) with a minimum version of 11.
 
 The commands to do this will vary depending upon which operating system you are building on.
 
@@ -50,10 +47,6 @@ If you are building the "community" profile and are using a different maven inst
 The distribution is then available in:
 
 	./narayana-full/target/narayana-full-<VERSION>-bin.zip
-
-Alternatively, the uber jar for JacORB is available here:
-
-	./ArjunaJTS/narayana-jts-jacorb/target/narayana-jts-jacorb-<VERSION>.jar
 	
 The uber jar for the JDK ORB is available here:
 
@@ -80,9 +73,7 @@ ArjunaCore: `./build.[sh|bat] -am -pl :arjunacore`
 
 NarayanaJTA: `./build.[sh|bat] -am -pl :narayana-jta`
 
-NarayanaJTS (jacorb): `./build.[sh|bat] -am -pl :narayana-jts-jacorb -Didlj-disabled=true`
-
-NarayanaJTS (idlj): `./build.[sh|bat] -am -pl :narayana-jts-idlj -Djacorb-disabled=true`
+NarayanaJTS (idlj): `./build.[sh|bat] -am -pl :narayana-jts-idlj`
 
 NarayanaJTS (ibmorb): `./build.[sh|bat] -am -pl :narayana-jts-ibmorb -Dibmorb-enabled=true` (requires IBM jdk)
 

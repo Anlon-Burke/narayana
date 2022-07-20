@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.jboss.narayana.rts</groupId>
     <artifactId>lra-parent</artifactId>
-    <version>5.12.7.Final-SNAPSHOT</version>
+    <version>5.12.8.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -110,10 +110,13 @@
         <module>crash</module>
       </modules>
       <properties>
+        <config.to.replace>standalone.xml</config.to.replace>
         <!-- Qualifier of the container hosting lra-coordinator -->
         <lra.coordinator.container.qualifier>lra-coordinator-server</lra.coordinator.container.qualifier>
         <!-- Qualifier of the lra-coordinator of the deployment -->
         <lra.coordinator.deployment.qualifier>lra-coordinator</lra.coordinator.deployment.qualifier>
+        <!-- The path where the Object Store of the coordinator should be saved -->
+        <lra.coordinator.object.store.path>${project.build.directory}/wfly_lra_objectstore</lra.coordinator.object.store.path>
         <!-- the AppServerCoordinatorDeploymentObserver creates the deployment named 'lra-coordinator' and deploys it to the app server,
              the last part of the path with value 'lra-coordinator' is defined by LRA coordinator JAX-RS endpoint -->
         <lra.coordinator.url>http://${lra.coordinator.host}:${lra.coordinator.port}/lra-coordinator/lra-coordinator</lra.coordinator.url>
@@ -130,6 +133,7 @@
              standalone.xml file provided in WildFly (${env.JBOSS_HOME}/standalone/configuration/standalone.xml). Please, see the plugins
              section of this profile (specifically, maven-antrun-plugin) for further info -->
         <lra.participant.xml.filename>lra-participant.xml</lra.participant.xml.filename>
+        <server.jvm.object.store.arg>-DObjectStoreEnvironmentBean.objectStoreDir=${lra.coordinator.object.store.path}</server.jvm.object.store.arg>
         <skip.wildfly.plugin>true</skip.wildfly.plugin>
         <!-- where the WFLY test application will be started at (the coordinator is war deployed for the same app server at the same port) -->
         <test.application.port>8080</test.application.port>
@@ -198,8 +202,11 @@
                 <phase>generate-test-resources</phase>
                 <configuration>
                   <target>
-                    <copy file="${env.JBOSS_HOME}/standalone/configuration/standalone.xml" tofile="${env.JBOSS_HOME}/standalone/configuration/${lra.coordinator.xml.filename}"></copy>
-                    <copy file="${env.JBOSS_HOME}/standalone/configuration/standalone.xml" tofile="${env.JBOSS_HOME}/standalone/configuration/${lra.participant.xml.filename}"></copy>
+                    <zip basedir="../../" destfile="../../ObjectStore-${project.artifactId}.zip" includes="ObjectStore" whenempty="skip"></zip>
+                    <delete dir="../../ObjectStore" failonerror="false"></delete>
+                    <!-- We overwrite the config files as the config.to.replace can be different in different modules and without overwrite being the case, then the file will not be written over -->
+                    <copy file="${env.JBOSS_HOME}/standalone/configuration/${config.to.replace}" overwrite="true" tofile="${env.JBOSS_HOME}/standalone/configuration/${lra.coordinator.xml.filename}"></copy>
+                    <copy file="${env.JBOSS_HOME}/standalone/configuration/${config.to.replace}" overwrite="true" tofile="${env.JBOSS_HOME}/standalone/configuration/${lra.participant.xml.filename}"></copy>
                   </target>
                 </configuration>
               </execution>
@@ -235,6 +242,7 @@
                   <!-- used by start -->
                   <jbossHome>${env.JBOSS_HOME}</jbossHome>
                   <serverConfig>${lra.coordinator.xml.filename}</serverConfig>
+                  <javaOpts>${server.jvm.args} ${server.jvm.object.store.arg}</javaOpts>
 
                   <!-- used by deploy-artifact -->
                   <groupId>org.jboss.narayana.rts</groupId>
@@ -263,6 +271,7 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
+              <argLine>${server.jvm.args}</argLine>
               <skipITs>false</skipITs>
               <reportsDirectory>${project.build.directory}/failsafe-reports-arq</reportsDirectory>
               <summaryFile>${project.build.directory}/failsafe-reports-arq/failsafe-summary.xml</summaryFile>
@@ -406,6 +415,17 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>jdk17</id>
+      <activation>
+        <jdk>[17,)</jdk>
+      </activation>
+      <properties>
+        <!-- At least org.eclipse.microprofile.lra.tck.TckUnknownStatusTests needs java.base/java.lang and java.base/java.lang.reflect -->
+        <jvm.args.modular>--add-opens=java.base/java.lang=ALL-UNNAMED
+          --add-opens=java.base/java.lang.reflect=ALL-UNNAMED</jvm.args.modular>
+      </properties>
     </profile>
   </profiles>
 </project>

@@ -2,13 +2,16 @@ name: LRA
 
 on:
   push:
-    branches: [ master ]
-    paths:
-      - "rts/lra/**"
   pull_request:
     branches: [ master ]
     paths:
       - "rts/lra/**"
+      - "rts/pom.xml"
+      - "ArjunaCore/arjuna/**"
+      - "ArjunaCore/pom.xml"
+      - "pom.xml"
+      - "scripts/hudson/narayana.sh"
+      - ".github/workflows/lra-test.yml"
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -18,7 +21,7 @@ jobs:
     timeout-minutes: 120
     strategy:
       matrix:
-        java-version: [ 8, 11 ]
+        java-version: [ 11, 17 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -35,4 +38,17 @@ jobs:
           WORKSPACE=$PWD PROFILE=LRA ./scripts/hudson/narayana.sh
         env:
           LRA_TCK_TIMEOUT_FACTOR: 1
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: wildfly-logs
+          path: |
+            wildfly-*/standalone/log/
+            **/ObjectStore*/**
+            **/tx-object-store/**
+            **/*tx-object-store.zip
+            **/target/*surefire-reports*/**
+            **/target/*failsafe-reports*/**
+          if-no-files-found: error
 

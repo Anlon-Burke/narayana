@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>5.12.7.Final-SNAPSHOT</version>
+    <version>5.12.8.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -257,10 +257,8 @@
                       <fileset dir="../ArjunaJTA/jms/target/${surefire.reports.directory}" includes="**/*.xml"/>
                       <fileset dir="../tools/target/${surefire.reports.directory}" includes="**/*.xml"/>
 
-                      <fileset dir="../ArjunaJTS/jts/target/jacorb-surefire-reports" includes="**/*.xml"/>
                       <fileset dir="../ArjunaJTS/jts/target/idlj-surefire-reports" includes="**/*.xml"/>
                       <fileset dir="../ArjunaJTS/jts/target/idlj-openjdk-surefire-reports" includes="**/*.xml"/>
-                      <fileset dir="../ArjunaJTS/orbportability/target/jacorb-surefire-reports" includes="**/*.xml"/>
                       <fileset dir="../ArjunaJTS/orbportability/target/idlj-surefire-reports" includes="**/*.xml"/>
                       <fileset dir="../ArjunaJTS/orbportability/target/idlj-openjdk-surefire-reports" includes="**/*.xml"/>
                       <fileset dir="../ArjunaJTS/jtax/target/${surefire.reports.directory}" includes="**/*.xml"/>

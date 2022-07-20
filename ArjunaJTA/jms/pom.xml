@@ -19,7 +19,7 @@
     <parent>
         <artifactId>narayana-jta-all</artifactId>
         <groupId>org.jboss.narayana.jta</groupId>
-        <version>5.12.7.Final-SNAPSHOT</version>
+        <version>5.12.8.Final-SNAPSHOT</version>
     </parent>
     <artifactId>jms</artifactId>
     <name>Narayana: ArjunaJTA JMS</name>
@@ -103,12 +103,6 @@
             <groupId>org.jboss.byteman</groupId>
             <artifactId>byteman-bmunit</artifactId>
             <version>${version.org.jboss.byteman}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>${version.log4j}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
