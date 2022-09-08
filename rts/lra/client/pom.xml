@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.jboss.narayana.rts</groupId>
     <artifactId>lra-parent</artifactId>
-    <version>5.12.8.Final-SNAPSHOT</version>
+    <version>5.13.1.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -31,11 +31,6 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-client</artifactId>
-      <version>${version.org.jboss.resteasy}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jackson2-provider</artifactId>
       <version>${version.org.jboss.resteasy}</version>
     </dependency>
@@ -48,7 +43,20 @@
   </dependencies>
 
   <build>
-    <finalName>lra-client</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 
   <profiles>

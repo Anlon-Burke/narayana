@@ -19,7 +19,7 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>5.12.8.Final-SNAPSHOT</version>
+    <version>5.13.1.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -28,7 +28,6 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   <packaging>pom</packaging>
   <name>Narayana: RESTful transactions</name>
   <description>RESTful transactions</description>
-  <url>http://www.jboss.org/jbosstm</url>
 
   <properties>
     <version.resteasy-client>${version.org.jboss.resteasy}</version.resteasy-client>

@@ -52,7 +52,7 @@ if [[ $M2OK == n* ]]
 then
   exit
 fi
-read -p "You will need: docker.io account with permission to push under https://hub.docker.com/u/jbosstm/. Do you have these? y/n: " ENVOK
+read -p "You will need: quay.io account with permission to push to jbosstm. Do you have this? y/n: " ENVOK
 if [[ $ENVOK == n* ]]
 then
   exit
@@ -64,8 +64,10 @@ then
 fi
 
 # Do this early to prevent later interactive need
-docker login docker.io
-[ $? -ne 0 ] && echo "Login to docker.io was not succesful" && exit
+echo "loging in to quay.io ..."
+# log in to quay.io
+podman login quay.io
+[ $? -ne 0 ] && echo "Login to quay.io was not succesful" && exit
 
 #if [ -z "$WFLYISSUE" ]
 #then
@@ -214,9 +216,7 @@ echo "building, tagging and pushing podman images to quay.io ..."
   # tag it and push it
   podman tag lra-coordinator quay.io/jbosstm/lra-coordinator:${CURRENT}
   podman tag lra-coordinator quay.io/jbosstm/lra-coordinator:latest
-  echo "loging in to quay.io ..."
-  # log in to quay.io
-  podman login quay.io
+
   # push the image
   podman push quay.io/jbosstm/lra-coordinator:${CURRENT}
   podman push quay.io/jbosstm/lra-coordinator:latest

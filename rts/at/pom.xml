@@ -20,14 +20,13 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   <parent>
     <groupId>org.jboss.narayana.rts</groupId>
     <artifactId>rest-tx</artifactId>
-    <version>5.12.8.Final-SNAPSHOT</version>
+    <version>5.13.1.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>restat</artifactId>
   <packaging>pom</packaging>
   <name>Narayana: restat</name>
   <description>RESTful Atomic Transactions</description>
-  <url>http://www.jboss.org/jbosstm</url>
 
   <modules>
     <module>util</module>
