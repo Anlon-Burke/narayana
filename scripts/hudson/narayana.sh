@@ -82,7 +82,6 @@ function init_test_options {
     [ $CODE_COVERAGE ] || CODE_COVERAGE=0
     [ x"$CODE_COVERAGE_ARGS" != "x" ] || CODE_COVERAGE_ARGS=""
     [ $ARQ_PROF ] || ARQ_PROF=arq	# IPv4 arquillian profile
-    [ $IBM_ORB ] || IBM_ORB=0
     [ $ENABLE_LRA_TRACE_LOGS ] || ENABLE_LRA_TRACE_LOGS=" -Dtest.logs.to.file=true -Dtrace.lra.coordinator"
 
     if ! get_pull_xargs "$PULL_DESCRIPTION_BODY" $PROFILE; then # see if the PR description overrides the profile
@@ -338,11 +337,6 @@ function build_narayana {
 
   [ $NARAYANA_TESTS = 1 ] && NARAYANA_ARGS= || NARAYANA_ARGS="-DskipTests"
 
-  if [ $IBM_ORB = 1 ]; then
-    ORBARG="-Dibmorb-enabled -Didlj-disabled -Dopenjdk-disabled"
-    ${JAVA_HOME}/bin/java -version 2>&1 | grep IBM
-    [ $? -eq 0 ] || fatal "You must use the IBM jdk to build with ibmorb"
-  fi
   echo "Using MAVEN_OPTS: $MAVEN_OPTS"
 
   ./build.sh -B -Prelease,community$OBJECT_STORE_PROFILE $ORBARG "$@" $NARAYANA_ARGS $IPV6_OPTS $CODE_COVERAGE_ARGS clean install
@@ -480,26 +474,37 @@ function osgi_tests {
 }
 
 function xts_as_tests {
-  echo "#-1. XTS AS Integration Test"
+  echo "#-1. XTS AS Tests"
   cd ${WORKSPACE}/jboss-as
+  ./build.sh -f xts/pom.xml -B $IPV6_OPTS -Dtimeout.factor=300 -Dsurefire.forked.process.timeout=12000 -Dsurefire.extra.args='-Xmx512m' -Djboss.dist="$JBOSS_HOME" -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@" test
+  [ $? -eq 0 ] || fatal "XTS AS Test failed"
   ./build.sh -f testsuite/integration/xts/pom.xml -fae -B -Pxts.integration.tests.profile -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@" test
   [ $? -eq 0 ] || fatal "XTS AS Integration Test failed"
   cd ${WORKSPACE}
 }
 
 function rts_as_tests {
-  echo "#-1. RTS AS Integration Test"
+  echo "#-1. RTS AS Tests"
   cd ${WORKSPACE}/jboss-as
+  ./build.sh -f rts/pom.xml -B $IPV6_OPTS -Dtimeout.factor=300 -Dsurefire.forked.process.timeout=12000 -Dsurefire.extra.args='-Xmx512m' -Djboss.dist="$JBOSS_HOME" -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@" test
+  [ $? -eq 0 ] || fatal "RTS AS Test failed"
   ./build.sh -f testsuite/integration/rts/pom.xml -fae -B -Prts.integration.tests.profile -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@" test
   [ $? -eq 0 ] || fatal "RTS AS Integration Test failed"
   cd ${WORKSPACE}
 }
 
 function jta_as_tests {
-  echo "#-1. JTA AS Integration Test"
+  echo "#-1. JTA AS Tests"
   cp ArjunaJTA/jta/src/test/resources/standalone-cmr.xml ${JBOSS_HOME}/standalone/configuration/
-  ./build.sh -f ArjunaJTA/jta/pom.xml -fae -B -DarqProfileActivated=true $CODE_COVERAGE_ARGS "$@" test
+  # If ARQ_PROF is not set an arquillian profile will not run but I guess the jdk17 profile would/could be activated still
+  ./build.sh -f ArjunaJTA/jta/pom.xml -fae -B -DarqProfileActivated=$ARQ_PROF $CODE_COVERAGE_ARGS "$@" test
   [ $? -eq 0 ] || fatal "JTA AS Integration Test failed"
+  cd ${WORKSPACE}/jboss-as
+  # Execute some directly relevant tests from modules of the application server
+  ./build.sh -f transactions/pom.xml -B $IPV6_OPTS -Dtimeout.factor=300 -Dsurefire.forked.process.timeout=12000 -Dsurefire.extra.args='-Xmx512m' -Djboss.dist="$JBOSS_HOME" -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@" test
+  [ $? -eq 0 ] || fatal "JTA AS transactions Test failed"
+  ./build.sh -f iiop-openjdk/pom.xml -B $IPV6_OPTS -Dtimeout.factor=300 -Dsurefire.forked.process.timeout=12000 -Dsurefire.extra.args='-Xmx512m' -Djboss.dist="$JBOSS_HOME" -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@" test
+  [ $? -eq 0 ] || fatal "JTA AS iiop-openjdk Test failed"
   cd ${WORKSPACE}
 }
 
@@ -719,13 +724,10 @@ function qa_tests_once {
   cp TaskImpl.properties.template TaskImpl.properties
 
   # check to see which orb we are running against:
-  if [ x$orb = x"ibmorb" ]; then
-    orbtype=ibmorb
-	sed -e "s#^  dist#  ${JAVA_HOME}\${file.separator}jre\${file.separator}lib\${file.separator}ibmorb.jar\\\\\\n  \${path.separator}${JAVA_HOME}\${file.separator}jre\${file.separator}lib\${file.separator}ibmorb.jar\\\\\\n  \${path.separator}dist#" TaskImpl.properties > "TaskImpl.properties.tmp" && mv "TaskImpl.properties.tmp" "TaskImpl.properties"
-  elif [ x$orb = x"openjdk" ]; then
+  if [ x$orb = x"openjdk" ]; then
     orbtype=openjdk
   else
-    fatal "Narayana does not support the specified ORB. Supported ORBs are: ibmorb and openjdk"
+    fatal "Narayana does not support the specified ORB. The only supported ORB is openjdk"
   fi
 
   testoutputzip="testoutput-${orbtype}.zip"
@@ -812,26 +814,13 @@ function qa_tests_once {
 }
 
 function qa_tests {
-  ibm_orb_tests_ok=0;
   openjdk_orb_tests_ok=0;
 
-  if [ $IBM_ORB = 1 ]; then
-    if [ $JAVA_VERSION -eq "17" ] ; then
-        echo "IBM ORB execution failed on JDK17, please check https://issues.redhat.com/browse/JBTM-3600 for more info."
-        exit -1
-    fi
-    qa_tests_once "orb=ibmorb" "$@" # run qa against the IBM orb
-    ibm_orb_tests_ok=$?
-  else
-    # OPENJDK_ORB #
-    qa_tests_once "orb=openjdk" "$@"    # run qa against the openjdk orb
-    openjdk_orb_tests_ok=$?
-  fi
+  # OPENJDK_ORB #
+  qa_tests_once "orb=openjdk" "$@"    # run qa against the openjdk orb
+  openjdk_orb_tests_ok=$?
 
-  [ $ibm_orb_tests_ok = 0 ] || echo some IBM ORB QA tests failed
   [ $openjdk_orb_tests_ok = 0 ] || echo some openjdk ORB QA tests failed
-
-  [ $openjdk_orb_tests_ok = 0 -a $ibm_orb_tests_ok = 0 ] || fatal "some qa tests failed"
 }
 
 function hw_spec {
