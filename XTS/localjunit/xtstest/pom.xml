@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.jboss.narayana.xts</groupId>
         <artifactId>localjunit</artifactId>
-        <version>5.13.1.Final-SNAPSHOT</version>
+        <version>6.0.0.Final-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -34,7 +34,7 @@
                     <archive>
                         <manifestEntries>
                             <Dependencies>
-                                org.jboss.jts,org.jboss.ws.api,javax.xml.ws.api,org.jboss.xts,org.jboss.ws.jaxws-client
+                                org.jboss.jts,org.jboss.ws.api,jakarta.xml.ws.api,org.jboss.xts,org.jboss.ws.jaxws-client
                                 services export,org.jboss.ws.cxf.jbossws-cxf-client services export
                             </Dependencies>
                         </manifestEntries>

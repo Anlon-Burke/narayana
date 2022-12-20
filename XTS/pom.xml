@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>5.13.1.Final-SNAPSHOT</version>
+    <version>6.0.0.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -37,12 +37,6 @@
     <sortpom.skip>true</sortpom.skip>
   </properties>
     <dependencies>
-        <dependency>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-            <version>${version.org.jboss.spec.javax.xml.bind.jboss-jaxb-api_2.3_spec}</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-ri</artifactId>
@@ -77,9 +71,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>javax.activation-api</artifactId>
-            <version>1.2.0</version>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+            <version>${version.jakarta.activation.jakarta.activation-api}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -99,10 +93,8 @@
     <module>WSTX</module>
     <module>recovery</module>
     <module>bridge</module>
-    <module>bridge-jakarta</module>
     <module>sar</module>
     <module>jbossxts</module>
-    <module>jbossxts-jakarta</module>
     <module>localjunit</module>
   </modules>
     <profiles>

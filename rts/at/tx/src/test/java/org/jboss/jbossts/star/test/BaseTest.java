@@ -22,7 +22,6 @@ package org.jboss.jbossts.star.test;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,21 +31,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.net.ssl.SSLContext;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HEAD;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 import com.arjuna.ats.arjuna.common.Uid;
 import com.arjuna.ats.arjuna.exceptions.ObjectStoreException;
@@ -57,10 +55,17 @@ import com.arjuna.ats.internal.arjuna.common.UidHelper;
 import com.arjuna.ats.internal.jta.transaction.arjunacore.AtomicAction;
 import com.squareup.okhttp.OkHttpClient;
 import io.undertow.Undertow;
+/* jakarta TODO do we want to support Jersey/grizzly
+means we deleted SpdyEnabledHttpServer
+import jakarta.ws.rs.core.UriBuilder;
+import java.net.URI;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
+import com.sun.grizzly.http.SelectorThread;
+//import com.sun.jersey.api.container.grizzly.GrizzlyWebContainerFactory;
+*/
 import org.jboss.jbossts.star.provider.HttpResponseException;
 import org.jboss.jbossts.star.provider.HttpResponseMapper;
 import org.jboss.jbossts.star.provider.NotFoundMapper;
@@ -83,16 +88,13 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sun.grizzly.http.SelectorThread;
-//import com.sun.jersey.api.container.grizzly.GrizzlyWebContainerFactory;
-
 public class BaseTest {
     protected static final Logger log = Logger.getLogger(BaseTest.class);
 
     protected static final ExecutorService executor = Executors.newFixedThreadPool(4);
     protected static boolean USE_NETTY = false;
     protected static boolean USE_UNDERTOW = true;
-    private static HttpServer grizzlyServer;
+// jarkarta TODO jersey    private static HttpServer grizzlyServer;
     protected static final String USE_SPDY_PROP = "rts.usespdy";
     protected static final String USE_SSL_PROP = "rts.usessl";
     protected static final boolean USE_SPDY = Boolean.getBoolean(USE_SPDY_PROP);
@@ -107,7 +109,7 @@ public class BaseTest {
     protected static final String PURL_NO_RESPONSE = PURL + "/" + NO_RESPONSE_SEGMENT;
     protected static String TXN_MGR_URL = SURL + "tx/transaction-manager";
     private static NettyJaxrsServer netty = null;
-    private static SelectorThread threadSelector = null;
+// jakarta TODO    private static SelectorThread threadSelector = null;
     private static UndertowJaxrsServer undertow;
 
     protected static void setTxnMgrUrl(String txnMgrUrl) {
@@ -149,6 +151,7 @@ public class BaseTest {
         executor.submit(job);
     }
 
+/* TODO do we want to support grizzly with jakarta
     protected static void startJersey(String packages) throws Exception {
         final Map<String, String> initParams = new HashMap<String, String>();
 
@@ -178,6 +181,7 @@ public class BaseTest {
             log.infof(e, "Error starting Grizzly");
         }
     }
+*/
 
     public static void startContainer(String txnMgrUrl, String packages, Class<?> ... classes) throws Exception {
         TxSupport.setTxnMgrUrl(txnMgrUrl);
@@ -190,7 +194,8 @@ public class BaseTest {
         else if (USE_UNDERTOW)
             startUndertow(classes);
         else
-            startJersey(packages);
+            throw new RuntimeException("Grizzly app server not supported with jakarta");
+//            startJersey(packages);
     }
 
     private static class SpdyConnection implements HttpConnectionCreator {
@@ -292,13 +297,14 @@ public class BaseTest {
             netty.stop();
             netty = null;
         }
-
+/* jakarta TODO do we want to support jersey
         if (threadSelector != null) {
             threadSelector.stopEndpoint();
             threadSelector = null;
         } else if (grizzlyServer != null) {
             grizzlyServer.shutdownNow();
         }
+ */
     }
 
     @Before

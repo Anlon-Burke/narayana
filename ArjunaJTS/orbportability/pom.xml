@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.jboss.narayana.jts</groupId>
     <artifactId>narayana-jts-all</artifactId>
-    <version>5.13.1.Final-SNAPSHOT</version>
+    <version>6.0.0.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>orbportability</artifactId>
@@ -67,7 +67,7 @@
     </dependency>
     <dependency>
       <groupId>org.jboss.openjdk-orb</groupId>
-      <artifactId>openjdk-orb</artifactId>
+      <artifactId>openjdk-orb-jakarta</artifactId>
       <version>${version.org.jboss.openjdk-orb}</version>
       <scope>test</scope>
     </dependency>
@@ -158,7 +158,7 @@
       <dependencies>
         <dependency>
           <groupId>org.jboss.openjdk-orb</groupId>
-          <artifactId>openjdk-orb</artifactId>
+          <artifactId>openjdk-orb-jakarta</artifactId>
           <version>${version.org.jboss.openjdk-orb}</version>
           <scope>provided</scope>
         </dependency>

@@ -13,7 +13,7 @@
   <parent>
     <groupId>org.jboss.narayana.rts</groupId>
     <artifactId>restat</artifactId>
-    <version>5.13.1.Final-SNAPSHOT</version>
+    <version>6.0.0.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -57,12 +57,6 @@
       <version>${version.org.jboss.logging.jboss-logging}</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-      <version>${version.javax.ws.rs-api}</version>
-      <scope>provided</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.jboss.byteman</groupId>
@@ -92,14 +86,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-jaxrs-json-provider</artifactId>
-      <version>${version.fasterxml.jackson}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.glassfish</groupId>
-      <artifactId>javax.json</artifactId>
+      <artifactId>jakarta.json</artifactId>
       <version>${version.glassfish.json}</version>
       <scope>test</scope>
     </dependency>
@@ -203,7 +191,7 @@
         </dependency>
         <dependency>
           <groupId>org.jboss.arquillian.protocol</groupId>
-          <artifactId>arquillian-protocol-servlet</artifactId>
+          <artifactId>arquillian-protocol-servlet-jakarta</artifactId>
           <version>${version.org.jboss.arquillian.core}</version>
           <scope>test</scope>
         </dependency>
@@ -265,7 +253,7 @@
         </dependency>
         <dependency>
           <groupId>org.jboss.arquillian.protocol</groupId>
-          <artifactId>arquillian-protocol-servlet</artifactId>
+          <artifactId>arquillian-protocol-servlet-jakarta</artifactId>
           <version>${version.org.jboss.arquillian.core}</version>
           <scope>test</scope>
         </dependency>

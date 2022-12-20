@@ -25,12 +25,13 @@ import com.arjuna.ats.jta.TransactionManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import java.util.Date;

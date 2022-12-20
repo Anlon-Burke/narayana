@@ -17,7 +17,7 @@
   <parent>
     <groupId>org.jboss.narayana.jts</groupId>
     <artifactId>narayana-idl</artifactId>
-    <version>5.13.1.Final-SNAPSHOT</version>
+    <version>6.0.0.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>idlj-idl-openjdk</artifactId>
@@ -27,13 +27,13 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.openjdk-orb</groupId>
-      <artifactId>openjdk-orb</artifactId>
+      <artifactId>openjdk-orb-jakarta</artifactId>
       <version>${version.org.jboss.openjdk-orb}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.openjdk-orb</groupId>
-      <artifactId>openjdk-orb</artifactId>
+      <artifactId>openjdk-orb-jakarta</artifactId>
       <version>${version.org.jboss.openjdk-orb}</version>
       <classifier>sources</classifier>
       <scope>provided</scope>
@@ -81,6 +81,7 @@
             <configuration>
               <sources>
                 <source>${project.build.directory}/generated-sources/idl</source>
+                <source>${project.basedir}/../src/main/</source>
               </sources>
             </configuration>
           </execution>
@@ -93,11 +94,32 @@
             <configuration>
               <sources>
                 <source>${project.build.directory}/generated-test-sources/idl</source>
+                <source>${project.basedir}/../src/test/</source>
               </sources>
             </configuration>
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>attach-test-sources</id>
+            <goals>
+              <goal>test-jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
@@ -111,7 +133,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>org.jboss.openjdk-orb</groupId>
-                  <artifactId>openjdk-orb</artifactId>
+                  <artifactId>openjdk-orb-jakarta</artifactId>
                   <classifier>sources</classifier>
                   <outputDirectory>${project.build.directory}/lib</outputDirectory>
                   <includes>**/*.idl</includes>
@@ -121,16 +143,17 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.7</version>
         <executions>
           <execution>
-            <id>generate-sources</id>
+            <id>compile-idl-sources</id>
             <goals>
               <goal>run</goal>
             </goals>
-            <phase>generate-sources</phase>
+            <phase>process-sources</phase>
             <configuration>
               <tasks name="Generate idl stubs">
                 <property name="idl.compiler.class" value="com.sun.tools.corba.se.idl.toJavaPortable.Compile"></property>

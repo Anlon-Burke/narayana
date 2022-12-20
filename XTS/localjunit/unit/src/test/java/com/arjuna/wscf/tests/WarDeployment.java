@@ -37,13 +37,13 @@ public class WarDeployment {
 		.addClass(TwoPhaseSynchronization.class)
 		.addClass(WSCF11TestUtils.class)
 		.addClasses(args)
-		.addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+        .addAsWebInfResource(new StringAsset("<beans bean-discovery-mode=\"all\"></beans>"), "beans.xml");
 
 		archive.delete(ArchivePaths.create("META-INF/MANIFEST.MF"));
 
 		final String ManifestMF = "Manifest-Version: 1.0\n"
 			+ "Dependencies: org.jboss.modules,org.jboss.msc,"
-			+ "org.jboss.jts,org.jboss.ws.api,javax.xml.ws.api,org.jboss.xts,"
+			+ "org.jboss.jts,org.jboss.ws.api,jakarta.xml.ws.api,org.jboss.xts,"
 			+ "org.jboss.ws.jaxws-client services export,org.jboss.ws.cxf.jbossws-cxf-client services export\n";
 		archive.setManifest(new StringAsset(ManifestMF));
 

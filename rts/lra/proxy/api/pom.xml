@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.jboss.narayana.rts</groupId>
     <artifactId>lra-proxy-parent</artifactId>
-    <version>5.13.1.Final-SNAPSHOT</version>
+    <version>6.0.0.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -25,15 +25,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
+      <groupId>jakarta.enterprise</groupId>
+      <artifactId>jakarta.enterprise.cdi-api</artifactId>
       <version>${version.cdi-api}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>${version.servlet-api}</version>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>${version.jakarta.servlet.api}</version>
       <scope>provided</scope>
     </dependency>
     <!-- jandex -->
@@ -69,12 +69,6 @@
       <version>${version.microprofile.lra}</version>
     </dependency>
     <!-- testing -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${version.fasterxml.jackson}</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>

@@ -28,17 +28,17 @@ import java.util.Enumeration;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
+import jakarta.annotation.Resource;
+import jakarta.inject.Inject;
 import javax.sql.DataSource;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
+import jakarta.transaction.HeuristicMixedException;
+import jakarta.transaction.HeuristicRollbackException;
+import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.Status;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -73,8 +73,8 @@ public class CMRIntegrationTest {
 				.addPackage("io.narayana.connectableresource")
 				.addAsManifestResource(new StringAsset(DEPENDENCIES),
 						"MANIFEST.MF")
-				.addAsManifestResource(EmptyAsset.INSTANCE,
-						ArchivePaths.create("beans.xml"));
+				.addAsManifestResource(new StringAsset("<beans bean-discovery-mode=\"all\"></beans>"),
+						"beans.xml");
 	}
 
 	@Resource(mappedName = "java:jboss/datasources/ExampleDS")

@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.jboss.narayana.jts</groupId>
     <artifactId>narayana-jts-all</artifactId>
-    <version>5.13.1.Final-SNAPSHOT</version>
+    <version>6.0.0.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>narayana-jts-integration</artifactId>
@@ -42,7 +42,7 @@
     </dependency>
     <dependency>
       <groupId>org.jboss</groupId>
-      <artifactId>jboss-transaction-spi</artifactId>
+      <artifactId>jboss-transaction-spi-jakarta</artifactId>
       <version>${version.org.jboss.jboss-transaction-spi}</version>
       <scope>provided</scope>
       <exclusions>
@@ -51,19 +51,6 @@
           <artifactId>jboss-logging-spi</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.ironjacamar</groupId>
-      <artifactId>ironjacamar-spec-api</artifactId>
-      <version>${version.org.jboss.ironjacamar}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.integration</groupId>
-      <artifactId>jboss-corba-ots-spi</artifactId>
-      <version>${version.org.jboss.integration}</version>
-      <!-- TODO AS7 -->
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.logging</groupId>
@@ -134,25 +121,6 @@
         <artifactId>nexus-staging-maven-plugin</artifactId>
         <inherited>false</inherited>
       </plugin>
-      <!--
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestEntries>
-              <Specification-Title>JTA/JTS</Specification-Title>
-              <Specification-Version>1.2/1.0</Specification-Version>
-              <Specification-Vendor>Oracle</Specification-Vendor>
-              <Implementation-Version>${project.version} (revision: ${buildNumber})</Implementation-Version>
-              <arjuna-scm-revision>${buildNumber}</arjuna-scm-revision>
-              <arjuna-properties-file>jbossts-properties.xml</arjuna-properties-file>
-              <arjuna-builder>JBoss Inc. [${user.name}] ${os.name} ${os.version} ${buildproperty.date}</arjuna-builder>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-      -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>

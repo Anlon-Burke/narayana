@@ -19,13 +19,13 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://jboss.org/schema/arquillian
         http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
-   <!-- Force the use of the Servlet 3.0 protocol with all containers, as it is the most mature -->
-   <defaultProtocol type="Servlet 3.0" />
+   <!-- Force the use of the Servlet 5.0 protocol with all containers, as it is the most mature -->
+   <defaultProtocol type="Servlet 5.0" />
 
    <container qualifier="jboss" default="true">
         <configuration>
             <!-- defaults to JBOSS_HOME
-<property name="jbossHome">$WORKSPACE/jboss-as/build/target/wildfly-$WILDFLY_MASTER_VERSION</property> -->
+<property name="jbossHome">$WORKSPACE/jboss-as/build/target/wildfly-$WILDFLY_MAIN_VERSION</property> -->
 <!--
 cp /home/mmusgrov/source/forks/narayana/tom/jboss-as/build/target/wildfly-8.0.0.Final-SNAPSHOT/standalone/configuration/standalone-full.xml /home/mmusgrov/source/forks/narayana/tom/jboss-as/build/target/wildfly-8.0.0.Final-SNAPSHOT/standalone/configuration/standalone-cmr.xml
 -->

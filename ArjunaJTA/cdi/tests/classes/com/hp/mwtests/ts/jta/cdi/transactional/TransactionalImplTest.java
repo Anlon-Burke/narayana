@@ -27,17 +27,17 @@ import org.junit.Assert;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.inject.Inject;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionalException;
-import javax.transaction.UserTransaction;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionalException;
+import jakarta.transaction.UserTransaction;
 
 /**
  * @author paul.robinson@redhat.com 01/05/2013
@@ -63,7 +63,7 @@ public class TransactionalImplTest {
 
         return ShrinkWrap.create(WebArchive.class, "test.war")
                 .addPackage("com.hp.mwtests.ts.jta.cdi.transactional")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource(new StringAsset("<beans bean-discovery-mode=\"all\"></beans>"), "beans.xml");
     }
 
     @After
