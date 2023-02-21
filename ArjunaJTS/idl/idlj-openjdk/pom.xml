@@ -17,7 +17,7 @@
   <parent>
     <groupId>org.jboss.narayana.jts</groupId>
     <artifactId>narayana-idl</artifactId>
-    <version>6.0.0.Final-SNAPSHOT</version>
+    <version>6.0.1.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>idlj-idl-openjdk</artifactId>
@@ -27,13 +27,13 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.openjdk-orb</groupId>
-      <artifactId>openjdk-orb-jakarta</artifactId>
+      <artifactId>openjdk-orb</artifactId>
       <version>${version.org.jboss.openjdk-orb}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.openjdk-orb</groupId>
-      <artifactId>openjdk-orb-jakarta</artifactId>
+      <artifactId>openjdk-orb</artifactId>
       <version>${version.org.jboss.openjdk-orb}</version>
       <classifier>sources</classifier>
       <scope>provided</scope>
@@ -133,7 +133,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>org.jboss.openjdk-orb</groupId>
-                  <artifactId>openjdk-orb-jakarta</artifactId>
+                  <artifactId>openjdk-orb</artifactId>
                   <classifier>sources</classifier>
                   <outputDirectory>${project.build.directory}/lib</outputDirectory>
                   <includes>**/*.idl</includes>

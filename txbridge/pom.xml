@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.jboss.narayana</groupId>
         <artifactId>narayana-all</artifactId>
-        <version>6.0.0.Final-SNAPSHOT</version>
+        <version>6.0.1.Final-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -294,7 +294,7 @@
 
         <dependency>
             <groupId>org.jboss</groupId>
-            <artifactId>jboss-transaction-spi-jakarta</artifactId>
+            <artifactId>jboss-transaction-spi</artifactId>
             <version>${version.org.jboss.jboss-transaction-spi}</version>
             <scope>provided</scope>
         </dependency><dependency>
