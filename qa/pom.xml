@@ -17,7 +17,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>6.0.1.Final-SNAPSHOT</version>
+    <version>6.0.2.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>qa</artifactId>
@@ -27,24 +27,30 @@
   <properties>
     <version.com.sun.messaging.mq.fscontext>4.6-b01</version.com.sun.messaging.mq.fscontext>
     <version.jboss.profiler.jvmti>1.0.0.CR5</version.jboss.profiler.jvmti>
-    <version.log4j-core>2.19.0</version.log4j-core>
   </properties>
-
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.narayana</groupId>
+        <artifactId>narayana-bom</artifactId>
+        <version>6.0.2.Final-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>org.jboss.logging</groupId>
       <artifactId>jboss-logging</artifactId>
-      <version>${version.org.jboss.logging.jboss-logging}</version>
     </dependency>
     <dependency>
-      <groupId>jakarta.transaction</groupId>
-      <artifactId>jakarta.transaction-api</artifactId>
-      <version>${version.jakarta.transaction.jakarta-transaction-api}</version>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>artemis-journal</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-transaction-spi</artifactId>
-      <version>${version.org.jboss.jboss-transaction-spi}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.openjdk-orb</groupId>
@@ -60,97 +66,55 @@
     <dependency>
       <groupId>jboss.profiler.jvmti</groupId>
       <artifactId>jboss-profiler-jvmti</artifactId>
-      <version>${version.jboss.profiler.jvmti}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>${version.junit}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-core</artifactId>
-      <version>${version.hamcrest}</version>
     </dependency>
     <dependency>
       <groupId>org.jacoco</groupId>
       <artifactId>org.jacoco.ant</artifactId>
-      <version>${version.org.jacoco}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jacoco</groupId>
-      <artifactId>org.jacoco.report</artifactId>
-      <version>${version.org.jacoco}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jacoco</groupId>
-      <artifactId>org.jacoco.core</artifactId>
-      <version>${version.org.jacoco}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jacoco</groupId>
-      <artifactId>org.jacoco.agent</artifactId>
-      <version>${version.org.jacoco}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.ant</groupId>
-      <artifactId>ant</artifactId>
-      <version>${version.org.apache.ant}</version>
     </dependency>
     <dependency>
       <groupId>ant-contrib</groupId>
       <artifactId>ant-contrib</artifactId>
-      <version>${version.ant-contrib}</version>
     </dependency>
     <dependency>
       <groupId>com.sun.messaging.mq</groupId>
       <artifactId>fscontext</artifactId>
-      <version>${version.com.sun.messaging.mq.fscontext}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>${version.log4j-core}</version>
     </dependency>
 
     <!-- Narayana Dependencies -->
     <dependency>
       <groupId>org.jboss.narayana.jts</groupId>
-      <artifactId>orbportability</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.narayana.jts</groupId>
       <artifactId>narayana-jts-idlj</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.narayana.jts</groupId>
       <artifactId>narayana-jts-integration</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.narayana.jts</groupId>
       <artifactId>jts</artifactId>
-      <version>${project.version}</version>
       <classifier>test-sources</classifier>
     </dependency>
     <dependency>
       <groupId>org.jboss.narayana.jts</groupId>
       <artifactId>idlj-idl-openjdk</artifactId>
-      <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>org.jboss.narayana.jts</groupId>
       <artifactId>idlj-idl-openjdk</artifactId>
-      <version>${project.version}</version>
       <classifier>test-sources</classifier>
     </dependency>
     <dependency>
       <groupId>org.jboss.narayana.jts</groupId>
       <artifactId>idlj-idl-openjdk</artifactId>
-      <version>${project.version}</version>
       <classifier>tests</classifier>
     </dependency>
     <dependency>
@@ -161,7 +125,6 @@
     <dependency>
       <groupId>org.jboss.narayana</groupId>
       <artifactId>common</artifactId>
-      <version>${project.version}</version>
       <classifier>test-sources</classifier>
     </dependency>
 
@@ -170,22 +133,18 @@
     <dependency>
       <groupId>com.oracle.database.jdbc</groupId>
       <artifactId>ojdbc8</artifactId>
-      <version>${version.com.oracle}</version>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>${version.postgresql}</version>
     </dependency>
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
-      <version>${version.mysql}</version>
     </dependency>
     <dependency>
       <groupId>com.ibm.db2</groupId>
       <artifactId>jcc</artifactId>
-      <version>${version.com.ibm}</version>
     </dependency>
   </dependencies>
 
@@ -277,6 +236,20 @@
             <phase>install</phase>
             <configuration>
               <excludeArtifactIds>ojdbc8, postgresql, mysql-connector-java, jcc</excludeArtifactIds>
+              <outputDirectory>${project.basedir}/ext</outputDirectory>
+            </configuration>
+          </execution>
+          <!-- Transitive dependencies are also copied as ant needs to have these jars in its classpath -->
+          <!-- This execution can be removed ONLY if ant is replaced with maven -->
+          <execution>
+            <id>TransitiveDependencies</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>install</phase>
+            <configuration>
+              <excludeTransitive>false</excludeTransitive>
+              <includeGroupIds>org.slf4j, jakarta.transaction, org.hamcrest, org.apache.activemq, io.netty, org.jacoco, org.jboss.narayana.jts</includeGroupIds>
               <outputDirectory>${project.basedir}/ext</outputDirectory>
             </configuration>
           </execution>
