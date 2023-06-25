@@ -1,24 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source.
- * Copyright 2017, Red Hat, Inc., and individual contributors
- * as indicated by the @author tags. See the copyright.txt file in the
- * distribution for a full listing of individual contributors.
- *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+   Copyright The Narayana Authors
+   SPDX short identifier: Apache-2.0
  */
+
 package io.narayana.lra.client;
 
 import io.narayana.lra.Current;
@@ -41,6 +25,8 @@ import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Link;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
@@ -735,6 +721,7 @@ public class NarayanaLRAClient implements Closeable {
         Client client = null;
         Response response = null;
         URL lraId = null;
+        String data = compensatorData == null ? null : compensatorData.toString();
 
         try {
             lraId = uri.toURL();
@@ -748,16 +735,24 @@ public class NarayanaLRAClient implements Closeable {
 
         try {
             client = getClient();
+
             try {
+
+                MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
+                headers.add(NARAYANA_LRA_API_VERSION_HEADER_NAME, LRAConstants.CURRENT_API_VERSION_STRING);
+
+                if (data != null) {
+                    headers.add(NARAYANA_LRA_PARTICIPANT_DATA_HEADER_NAME, data);
+                }
+
+                headers.add("Link", linkHeader);
                 response = client.target(coordinatorUrl)
                     .path(LRAConstants.getLRAUid(uri))
                     .queryParam(TIMELIMIT_PARAM_NAME, timelimit)
                     .request()
-                    .header(NARAYANA_LRA_API_VERSION_HEADER_NAME, LRAConstants.CURRENT_API_VERSION_STRING)
-                    .header(NARAYANA_LRA_PARTICIPANT_DATA_HEADER_NAME, compensatorData)
-                    .header("Link", linkHeader)
+                    .headers(headers)
                     .async()
-                    .put(Entity.text(compensatorData == null ? linkHeader : compensatorData))
+                    .put(Entity.text(compensatorData == null ? linkHeader : data))
                     .get(JOIN_TIMEOUT, TimeUnit.SECONDS);
 
             String responseEntity = response.hasEntity() ? response.readEntity(String.class) : "";

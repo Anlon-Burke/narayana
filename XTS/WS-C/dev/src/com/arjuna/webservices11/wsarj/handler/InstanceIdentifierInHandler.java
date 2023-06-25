@@ -1,3 +1,7 @@
+/*
+   Copyright The Narayana Authors
+   SPDX short identifier: Apache-2.0
+ */
 package com.arjuna.webservices11.wsarj.handler;
 
 import com.arjuna.webservices.logging.WSCLogger;

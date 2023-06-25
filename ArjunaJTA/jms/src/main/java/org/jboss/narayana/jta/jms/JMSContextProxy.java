@@ -1,3 +1,7 @@
+/*
+   Copyright The Narayana Authors
+   SPDX short identifier: Apache-2.0
+ */
 package org.jboss.narayana.jta.jms;
 
 import com.arjuna.ats.jta.logging.jtaLogger;

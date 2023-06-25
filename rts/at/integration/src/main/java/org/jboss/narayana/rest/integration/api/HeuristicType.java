@@ -1,3 +1,7 @@
+/*
+   Copyright The Narayana Authors
+   SPDX short identifier: Apache-2.0
+ */
 package org.jboss.narayana.rest.integration.api;
 
 import org.jboss.jbossts.star.util.TxStatus;

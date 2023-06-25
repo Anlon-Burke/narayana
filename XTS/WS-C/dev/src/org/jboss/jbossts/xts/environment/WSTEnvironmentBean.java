@@ -1,3 +1,7 @@
+/*
+   Copyright The Narayana Authors
+   SPDX short identifier: Apache-2.0
+ */
 package org.jboss.jbossts.xts.environment;
 
 import com.arjuna.common.internal.util.propertyservice.FullPropertyName;

@@ -1,3 +1,7 @@
+/*
+   Copyright The Narayana Authors
+   SPDX short identifier: Apache-2.0
+ */
 package io.narayana.lra.coordinator.domain.model.objectstore;
 
 import io.narayana.lra.LRAData;

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2017 Red Hat, Inc. and/or its affiliates.
-  ~
-  ~ Licensed under the Apache License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
-  -->
+   Copyright The Narayana Authors
+   SPDX short identifier: Apache-2.0
+ -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -20,9 +19,9 @@
   <description>LRA tests running LRA TCKs and Narayana LRA internal testsuite</description>
 
   <modules>
+    <module>arquillian-extension</module>
     <module>tck</module>
     <module>basic</module>
-    <module>arquillian-extension</module>
   </modules>
 
   <properties>
@@ -124,7 +123,6 @@
         <skip.wildfly.plugin>true</skip.wildfly.plugin>
         <!-- where the WFLY test application will be started at (the coordinator is war deployed for the same app server at the same port) -->
         <test.application.port>8080</test.application.port>
-        <version.wildfly-maven-plugin>4.0.0.Final</version.wildfly-maven-plugin>
         <!-- this property is only used in direct submodules, if used outside this scope it needs to be redefined -->
         <wildfly.trace.logging.cli.script>${project.basedir}/../wildfly-trace-logging.cli</wildfly.trace.logging.cli.script>
       </properties>

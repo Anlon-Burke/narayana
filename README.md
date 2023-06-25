@@ -1,7 +1,6 @@
 [![Narayana](https://design.jboss.org/narayana/logo/final/narayana_logo_600px.png)](https://narayana.io/)
 
 [![Version](https://img.shields.io/maven-central/v/org.jboss.narayana/narayana-all?logo=apache-maven&style=for-the-badge)](https://search.maven.org/artifact/org.jboss.narayana/narayana-all)
-[![License](https://img.shields.io/badge/License-LGPL%20v2.1-green.svg?style=for-the-badge)](http://www.gnu.org/licenses/lgpl-2.1)
 
 Narayana
 ========
@@ -23,7 +22,7 @@ https://developer.jboss.org/wiki/PerformanceGatesForAcceptingPerformanceFixesInN
 
 Requirements
 ------------
-To build this project you will need a JDK (Java Development Kit) with a minimum version of 11.
+To build this project you will need a JDK (Java Development Kit) with a minimum version of 11 and a Maven with a minimum version specified in the [maven wrapper properties file](.mvn/wrapper/maven-wrapper.properties)
 
 The commands to do this will vary depending upon which operating system you are building on.
 
