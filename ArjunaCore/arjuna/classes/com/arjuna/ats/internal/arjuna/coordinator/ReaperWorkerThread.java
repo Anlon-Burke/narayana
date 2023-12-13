@@ -1,9 +1,7 @@
 /*
    Copyright The Narayana Authors
-   SPDX short identifier: Apache-2.0
+   SPDX-License-Identifier: Apache-2.0
  */
-
-
 package com.arjuna.ats.internal.arjuna.coordinator;
 
 import com.arjuna.ats.arjuna.coordinator.TransactionReaper;

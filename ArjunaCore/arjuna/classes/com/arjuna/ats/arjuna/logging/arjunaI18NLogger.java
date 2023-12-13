@@ -1,8 +1,7 @@
 /*
    Copyright The Narayana Authors
-   SPDX short identifier: Apache-2.0
+   SPDX-License-Identifier: Apache-2.0
  */
-
 package com.arjuna.ats.arjuna.logging;
 
 import static org.jboss.logging.Logger.Level.ERROR;
@@ -580,8 +579,7 @@ public interface arjunaI18NLogger {
 	public void warn_coordinator_notrunning();
 
 	@Message(id = 12138, value = "Node name cannot exceed {0} bytes!", format = MESSAGE_FORMAT)
-	@LogMessage(level = WARN)
-	public void warn_coordinator_toolong(Integer arg0);
+	String warn_coordinator_toolong(Integer arg0);
 
 	@Message(id = 12139, value = "You have chosen to disable the Multiple Last Resources warning. You will see it only once.", format = MESSAGE_FORMAT)
 	@LogMessage(level = WARN)

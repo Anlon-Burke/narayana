@@ -14,7 +14,12 @@
   <artifactId>narayana-bom</artifactId>
   <packaging>pom</packaging>
   <name>Narayana Bom</name>
-  <description>Narayana BOM</description>
+  <description>Narayana BOM is for centralising dependency management for development purposes</description>
+
+  <!--
+    This Bill of Materials (BOM) is for centralising dependency management across the various modules of Narayana.
+    The BOM is intended for development purposes within Narayana.
+  -->
 
   <properties>
     <version.com.sybase.jConnect>6.0</version.com.sybase.jConnect>
@@ -23,7 +28,6 @@
     <version.io.smallrye.smallrye-config>3.2.0</version.io.smallrye.smallrye-config>
     <version.jakarta.activation.jakarta.activation-api>2.1.0</version.jakarta.activation.jakarta.activation-api>
     <version.jakarta.annotation.jakarta-annotation-api>2.1.1</version.jakarta.annotation.jakarta-annotation-api>
-    <version.jakarta.ejb.jakarta-ejb-api>4.0.1</version.jakarta.ejb.jakarta-ejb-api>
     <version.jakarta.enterprise>4.0.0</version.jakarta.enterprise>
     <version.jakarta.enterprise.jakarta.enterprise.cdi-api>4.0.1</version.jakarta.enterprise.jakarta.enterprise.cdi-api>
     <version.jakarta.inject.jakarta.inject-api>2.0.1</version.jakarta.inject.jakarta.inject-api>
@@ -34,19 +38,19 @@
     <version.jakarta.persistence.jakarta.persistence-api>3.1.0</version.jakarta.persistence.jakarta.persistence-api>
     <version.jakarta.platform.jakarta.jakartaee-api>10.0.0</version.jakarta.platform.jakarta.jakartaee-api>
     <version.jakarta.resource.jakarta-resource-api>2.0.0</version.jakarta.resource.jakarta-resource-api>
-    <version.jakarta.servlet.jakarta-servlet-api>5.0.0</version.jakarta.servlet.jakarta-servlet-api>
+    <version.jakarta.servlet.jakarta-servlet-api>6.0.0</version.jakarta.servlet.jakarta-servlet-api>
     <version.jakarta.transaction.jakarta-transaction-api>2.0.1</version.jakarta.transaction.jakarta-transaction-api>
     <version.jakarta.ws.rs.jakarta-ws-rs-api>3.1.0</version.jakarta.ws.rs.jakarta-ws-rs-api>
     <version.jakarta.xml.bind.jakarta-xml-bind-api>4.0.0</version.jakarta.xml.bind.jakarta-xml-bind-api>
     <version.jakarta.xml.ws.jakarta.xml.ws-api>4.0.0</version.jakarta.xml.ws.jakarta.xml.ws-api>
-    <version.jaxws-ri>4.0.0</version.jaxws-ri>
+    <version.jaxws-ri>4.0.1</version.jaxws-ri>
     <version.jboss-modules>1.10.2.Final</version.jboss-modules>
     <version.jboss.jnpserver>4.2.2.GA</version.jboss.jnpserver>
     <version.jfree>1.5.3</version.jfree>
     <version.jnpserver>5.0.3.GA</version.jnpserver>
     <version.microprofile.config-api>3.0.2</version.microprofile.config-api>
     <version.microprofile.fault-tolerance>4.0.2</version.microprofile.fault-tolerance>
-    <version.org.apache.activemq>2.24.0</version.org.apache.activemq>
+    <version.org.apache.activemq>2.30.0</version.org.apache.activemq>
     <version.org.eclipse.microprofile.openapi>3.1</version.org.eclipse.microprofile.openapi>
     <version.org.eclipse.microprofile.reactive-streams-operators>3.0</version.org.eclipse.microprofile.reactive-streams-operators>
     <version.org.jboss.arquillian.container.weld>3.0.2.Final</version.org.jboss.arquillian.container.weld>
@@ -60,7 +64,6 @@
     <version.org.jboss.logmanager>1.5.1.Final</version.org.jboss.logmanager>
     <version.org.jboss.openjdk-orb>9.0.1.Final</version.org.jboss.openjdk-orb>
     <version.org.jboss.ws>2.0.0.Final</version.org.jboss.ws>
-    <version.quarkus>3.0.1.Final</version.quarkus>
     <version.smallrye-converter-api>2.7.0</version.smallrye-converter-api>
     <version.sortpom>3.0.0</version.sortpom>
     <version.squareup.okhttp>1.5.4</version.squareup.okhttp>
@@ -147,11 +150,6 @@
         <groupId>jakarta.annotation</groupId>
         <artifactId>jakarta.annotation-api</artifactId>
         <version>${version.jakarta.annotation.jakarta-annotation-api}</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.ejb</groupId>
-        <artifactId>jakarta.ejb-api</artifactId>
-        <version>${version.jakarta.ejb.jakarta-ejb-api}</version>
       </dependency>
       <dependency>
         <groupId>io.smallrye.reactive</groupId>
@@ -253,12 +251,6 @@
         <artifactId>idlj-idl-openjdk</artifactId>
         <version>${project.version}</version>
         <classifier>tests</classifier>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.openjdk-orb</groupId>
-        <artifactId>openjdk-orb-jakarta</artifactId>
-        <version>${version.org.jboss.openjdk-orb}</version>
-        <classifier>sources</classifier>
       </dependency>
 
       <dependency>
@@ -728,17 +720,6 @@
         <groupId>tanukisoft</groupId>
         <artifactId>wrapper</artifactId>
         <version>${version.tanukisoft}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-resteasy</artifactId>
-        <version>${version.quarkus}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.threads</groupId>
-            <artifactId>jboss-threads</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>

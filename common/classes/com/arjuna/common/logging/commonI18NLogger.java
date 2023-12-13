@@ -1,6 +1,6 @@
 /*
    Copyright The Narayana Authors
-   SPDX short identifier: Apache-2.0
+   SPDX-License-Identifier: Apache-2.0
  */
 
 package com.arjuna.common.logging;
@@ -51,12 +51,10 @@ public interface commonI18NLogger {
     public void warn_common_ClassloadingUtility_3(String arg0, String arg1, @Cause() Throwable arg2);
 
     @Message(id = 48006, value = "cannot create new instance of {0}", format = MESSAGE_FORMAT)
-    @LogMessage(level = WARN)
-    public void warn_common_ClassloadingUtility_4(String arg0, @Cause() Throwable arg1);
+    public String warn_common_ClassloadingUtility_4(String arg0, @Cause() Throwable arg1);
 
     @Message(id = 48007, value = "cannot access {0}", format = MESSAGE_FORMAT)
-    @LogMessage(level = WARN)
-    public void warn_common_ClassloadingUtility_5(String arg0, @Cause() Throwable arg1);
+    public String warn_common_ClassloadingUtility_5(String arg0, @Cause() Throwable arg1);
 
     @Message(id = 48008, value = "cannot initialize from string {0}", format = MESSAGE_FORMAT)
     @LogMessage(level = WARN)
