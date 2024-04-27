@@ -14,7 +14,7 @@
   </parent>
   <groupId>org.jboss.narayana</groupId>
   <artifactId>narayana-all</artifactId>
-  <version>7.0.1.Final-SNAPSHOT</version>
+  <version>7.0.2.Final-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Narayana: all</name>
   <description>${project.artifactId}</description>
@@ -156,6 +156,8 @@
     <buildproperty.date>${maven.build.timestamp}</buildproperty.date>
     <!-- Checkstyle is disabled by default, but it could be enabled for default by a particular module -->
     <checkstyle.skip>true</checkstyle.skip>
+    <ipv6.server.jvm.args>-Djboss.bind.address=[::1] -Djboss.bind.address.management=[::1]
+      -Djboss.bind.address.unsecure=[::1] -Djava.net.preferIPv4Stack=false -Djava.net.preferIPv6Addresses=true</ipv6.server.jvm.args>
     <jvm.args.byteman>-Dorg.jboss.byteman.verbose
                         -Djboss.modules.system.pkgs=org.jboss.byteman
                         -Dorg.jboss.byteman.transform.all
@@ -173,12 +175,12 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <server.jvm.args>${jvm.args.other} ${jvm.args.byteman} ${jvm.args.memory} ${jvm.args.debug} ${jvm.args.modular}</server.jvm.args>
+    <server.jvm.args>${jvm.args.other} ${jvm.args.memory} ${jvm.args.debug} ${jvm.args.modular}</server.jvm.args>
     <!-- Sortpom is enabled by default, but it could be disabled in sub-modules setting sortpom.skip = true -->
     <sortpom.skip>false</sortpom.skip>
     <!-- The surefire/failsafe test execution logs goes to a file by default -->
     <testLogToFile>true</testLogToFile>
-    <version.com.github.spotbugs.spotbugs-maven-plugin>4.5.3.0</version.com.github.spotbugs.spotbugs-maven-plugin>
+    <version.com.github.spotbugs.spotbugs-maven-plugin>4.8.3.1</version.com.github.spotbugs.spotbugs-maven-plugin>
     <version.compiler.plugin>3.8.0-jboss-2</version.compiler.plugin>
 
     <version.doxia>1.8.1</version.doxia>
@@ -187,7 +189,7 @@
     <version.maven-failsafe-plugin>3.0.0-M7</version.maven-failsafe-plugin>
     <version.maven-surefire-plugin>3.0.0-M7</version.maven-surefire-plugin>
     <version.maven.checkstyle-plugin>3.1.2</version.maven.checkstyle-plugin>
-    <version.maven.jandex-plugin>3.0.5</version.maven.jandex-plugin>
+    <version.maven.jandex-plugin>3.1.7</version.maven.jandex-plugin>
 
     <!-- Needed forWildflyLRACoordinatorDeployment class -->
     <version.microprofile.lra>2.0</version.microprofile.lra>
@@ -198,10 +200,9 @@
 
     <version.org.jacoco>0.8.8</version.org.jacoco>
     <version.org.jboss.as.plugins.jboss-as-maven-plugin>7.4.Final</version.org.jboss.as.plugins.jboss-as-maven-plugin>
-    <version.org.jboss.byteman>4.0.19</version.org.jboss.byteman>
     <!-- Needed forWildflyLRACoordinatorDeployment class -->
     <version.org.jboss.resteasy>6.2.5.Final</version.org.jboss.resteasy>
-    <version.org.sonatype.plugins.nexus-staging-maven-plugin>1.6.6</version.org.sonatype.plugins.nexus-staging-maven-plugin>
+    <version.org.sonatype.plugins.nexus-staging-maven-plugin>1.6.13</version.org.sonatype.plugins.nexus-staging-maven-plugin>
     <version.quarkus-bom>3.0.1.Final</version.quarkus-bom>
     <version.quarkus-maven-plugin>3.0.1.Final</version.quarkus-maven-plugin>
     <version.sortpom>3.0.0</version.sortpom>
@@ -243,11 +244,6 @@
   <build>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.jboss.byteman</groupId>
-          <artifactId>byteman-rulecheck-maven-plugin</artifactId>
-          <version>${version.org.jboss.byteman}</version>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
@@ -524,37 +520,6 @@
     </plugins>
   </build>
   <profiles>
-    <profile>
-      <id>byteman-rulecheck</id>
-      <activation>
-        <property>
-          <name>!skipTests</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.jboss.byteman</groupId>
-            <artifactId>byteman-rulecheck-maven-plugin</artifactId>
-            <version>${version.org.jboss.byteman}</version>
-            <executions>
-              <execution>
-                <id>rulecheck</id>
-                <goals>
-                  <goal>rulecheck</goal>
-                </goals>
-                <phase>test-compile</phase>
-                <configuration>
-                  <includes>
-                    <include>**/*.btm</include>
-                  </includes>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
     <profile>
       <id>release</id>
       <build>

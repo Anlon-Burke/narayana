@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>7.0.1.Final-SNAPSHOT</version>
+    <version>7.0.2.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>qa</artifactId>
@@ -60,10 +60,12 @@
     <dependency>
       <groupId>jboss.profiler.jvmti</groupId>
       <artifactId>jboss-profiler-jvmti</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jacoco</groupId>
@@ -243,7 +245,7 @@
             <phase>install</phase>
             <configuration>
               <excludeTransitive>false</excludeTransitive>
-              <includeGroupIds>org.slf4j, jakarta.transaction, org.hamcrest, org.apache.activemq, io.netty, org.jacoco, org.jboss.narayana.jts</includeGroupIds>
+              <includeGroupIds>org.slf4j, jakarta.transaction, org.hamcrest, org.apache.activemq, io.netty, org.jacoco, org.ow2.asm, org.jboss.narayana.jts</includeGroupIds>
               <outputDirectory>${project.basedir}/ext</outputDirectory>
             </configuration>
           </execution>

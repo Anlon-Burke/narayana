@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.jboss.narayana.rts</groupId>
     <artifactId>restat</artifactId>
-    <version>7.0.1.Final-SNAPSHOT</version>
+    <version>7.0.2.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -19,12 +19,6 @@
 
   <name>Narayana: restat integration</name>
   <description>REST-AT Integration</description>
-
-  <properties>
-    <ipv6.server.jvm.args>-Djboss.bind.address=[::1] -Djboss.bind.address.management=[::1] -Djboss.bind.address.unsecure=[::1]
-            -Djava.net.preferIPv4Stack=false -Djava.net.preferIPv6Addresses=true</ipv6.server.jvm.args>
-    <server.jvm.args>${jvm.args.other} ${jvm.args.memory} ${jvm.args.debug} ${jvm.args.modular}</server.jvm.args>
-  </properties>
 
   <dependencyManagement>
     <dependencies>
@@ -68,21 +62,18 @@
     <dependency>
       <groupId>org.jboss.byteman</groupId>
       <artifactId>byteman</artifactId>
-      <version>${version.org.jboss.byteman}</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.byteman</groupId>
       <artifactId>byteman-submit</artifactId>
-      <version>${version.org.jboss.byteman}</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.byteman</groupId>
       <artifactId>byteman-bmunit</artifactId>
-      <version>${version.org.jboss.byteman}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -126,18 +117,6 @@
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-core-spi</artifactId>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.5.14</version>
     </dependency>
 
     <dependency>

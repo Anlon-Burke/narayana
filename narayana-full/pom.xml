@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>7.0.1.Final-SNAPSHOT</version>
+    <version>7.0.2.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>narayana-full</artifactId>
@@ -85,11 +85,6 @@
       <classifier>participant</classifier>
       <type>war</type>
     </dependency>
-    <!-- This dependency should be removed in JBTM-3056 -->
-    <dependency>
-      <groupId>org.jboss.narayana.xts</groupId>
-      <artifactId>xts-test-servlet</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.jboss.narayana</groupId>
       <artifactId>jbosstxbridge</artifactId>
@@ -132,11 +127,6 @@
           <artifactId>commons-httpclient</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>

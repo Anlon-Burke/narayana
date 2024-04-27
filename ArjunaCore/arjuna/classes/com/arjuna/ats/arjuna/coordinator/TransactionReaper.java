@@ -568,7 +568,7 @@ public class TransactionReaper
             throw new IllegalStateException(tsLogger.i18NLogger.get_coordinator_TransactionReaper_1());
         }
 
-        if (_dynamic && reaperElement.getNextCheckAbsoluteMillis() < nextDynamicCheckTime.get()) {
+        if (reaperElement.getNextCheckAbsoluteMillis() < nextDynamicCheckTime.get()) {
             updateCheckTimeForEarlierInsert(reaperElement.getNextCheckAbsoluteMillis());
         }
     }
@@ -713,7 +713,6 @@ public class TransactionReaper
 
         synchronized (this) {
             _inShutdown = true;
-
             /*
                 * If the caller does not want to wait for the normal transaction timeout
                 * periods to elapse before terminating, then we first start by enabling
@@ -722,6 +721,8 @@ public class TransactionReaper
 
             if (!waitForTransactions) {
                 _reaperElements.setAllTimeoutsToZero();
+                nextDynamicCheckTime.set(0);
+                notifyAll();
             }
 
             /*
@@ -729,8 +730,9 @@ public class TransactionReaper
                 * terminate normally.
                 */
             while (!_reaperElements.isEmpty()) {
+                
                 try {
-                    this.wait();
+                    this.wait(1000);
                 }
                 catch (final Exception ex) {
                 }

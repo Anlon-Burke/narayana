@@ -8,13 +8,14 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>7.0.1.Final-SNAPSHOT</version>
+    <version>7.0.2.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>test-utils</artifactId>
   <name>Narayana: Test Utilities</name>
   <url>http://maven.apache.org</url>
   <properties>
+    <checkstyle.skip>true</checkstyle.skip>
     <sortpom.skip>true</sortpom.skip>
   </properties>
   <dependencyManagement>

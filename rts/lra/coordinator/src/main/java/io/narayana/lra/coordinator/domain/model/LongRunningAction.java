@@ -609,7 +609,7 @@ public class LongRunningAction extends BasicAction {
         updateState(); // ensure the record is removed if it finished otherwise persisted the state
 
         if (!isRecovering()) {
-            lraService.finished(this, false);
+            lraService.finished(this, nested && cancel);
         }
 
         if (LRALogger.logger.isTraceEnabled()) {
@@ -979,7 +979,7 @@ public class LongRunningAction extends BasicAction {
     }
 
     private boolean linkChildWithParent(LongRunningAction localParent) {
-        par = new LRAParentAbstractRecord(localParent, this); // the new LRA we want parent to know about
+        par = new LRAParentAbstractRecord(localParent, this, lraService); // the new LRA we want parent to know about
 
         if (localParent.add(par) != AddOutcome.AR_ADDED) {
             return false;
@@ -1076,7 +1076,11 @@ public class LongRunningAction extends BasicAction {
                         LRALogger.logger.debugf("LongRunningAction.abortLRA cancelling LRA `%s", id);
                     }
 
-                    updateState(LRAStatus.Cancelling);
+                    if (getSize(pendingList) == 0 && getSize(preparedList) == 0 && getSize(heuristicList) == 0) {
+                        updateState(LRAStatus.Cancelled);
+                    } else {
+                        updateState(LRAStatus.Cancelling);
+                    }
                     if (LRALogger.logger.isTraceEnabled()) {
                         trace_progress("scheduledAbort fired");
                     }

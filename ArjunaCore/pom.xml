@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.jboss.narayana</groupId>
     <artifactId>narayana-all</artifactId>
-    <version>7.0.1.Final-SNAPSHOT</version>
+    <version>7.0.2.Final-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -18,6 +18,7 @@
   <name>Narayana: Arjunacore</name>
   <description>Narayana: Arjunacore All</description>
   <properties>
+    <checkstyle.skip>true</checkstyle.skip>
     <sortpom.skip>true</sortpom.skip>
   </properties>
 

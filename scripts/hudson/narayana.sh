@@ -23,13 +23,8 @@ function which_java {
   fi
 
   if [[ "$_java" ]]; then
-    version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
-
-    if [[ $version = 17* ]]; then
-      echo 17
-    elif [[ $version = 11* ]]; then
-      echo 11
-    fi
+    version=$("$_java" -version 2>&1 | grep -oP 'version "?(1\.)?\K\d+' || true)
+    echo $version
   fi
 }
 
@@ -39,6 +34,16 @@ function is_ibm {
   [[ $jvendor == *"IBM Corporation"* ]]
 }
 
+# check the JDK version and disable the WildFly clone, build and test when its minimum JDK version is higher 
+# see https://issues.redhat.com/browse/WFLY-18967
+function wildfly_minimum_jdk {
+  if [ "$_jdk" -lt 17 ]; then
+    echo "WildFly must be built with JDK 17 or greater" 
+    export AS_BUILD=0 AS_CLONE=0 AS_TESTS=0 JTA_AS_TESTS=0 RTS_AS_TESTS=0 LRA_AS_TESTS=0 XTS_AS_TESTS=0 XTS_TRACE=0 txbridge=0 ARQ_PROF=no_arq 
+    # without AS test results the code coverage does not work, so not running it
+    export CODE_COVERAGE=0
+  fi
+}
 function get_pull_xargs {
   rval=0
   res=$(echo $1 | sed 's/\\r\\n/ /g')
@@ -78,7 +83,7 @@ function init_test_options {
       fatal "Narayana does not support JDKs less than 11"
     fi
 
-    [ $NARAYANA_CURRENT_VERSION ] || NARAYANA_CURRENT_VERSION="7.0.1.Final-SNAPSHOT"
+    [ $NARAYANA_CURRENT_VERSION ] || NARAYANA_CURRENT_VERSION="7.0.2.Final-SNAPSHOT"
     [ $CODE_COVERAGE ] || CODE_COVERAGE=0
     [ x"$CODE_COVERAGE_ARGS" != "x" ] || CODE_COVERAGE_ARGS=""
     [ $ARQ_PROF ] || ARQ_PROF=arq	# IPv4 arquillian profile
@@ -89,13 +94,13 @@ function init_test_options {
         export COMMENT_ON_PULL=""
         export AS_BUILD=0 AS_CLONE=0 AS_TESTS=0 NARAYANA_BUILD=0 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
         export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 OPENJDK_ORB=0 JAC_ORB=0 JTA_AS_TESTS=0
-        export PERF_TESTS=0 TOMCAT_TESTS=0 LRA_TESTS=0
+        export PERF_TESTS=0 TOMCAT_TESTS=0 LRA_TESTS=0 LRA_AS_TESTS=0
     elif [[ $PROFILE == "CORE" ]]; then
         if [[ ! $PULL_DESCRIPTION_BODY == *!MAIN* ]] && [[ ! $PULL_DESCRIPTION_BODY == *!CORE* ]]; then
           comment_on_pull "Started testing this pull request with $PROFILE profile: $BUILD_URL"
           export AS_BUILD=1 AS_CLONE=1 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=1 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
           export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=1 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=1
-          export TOMCAT_TESTS=0 LRA_TESTS=0
+          export TOMCAT_TESTS=0 LRA_TESTS=0 LRA_AS_TESTS=0
         else
           export COMMENT_ON_PULL=""
         fi
@@ -105,7 +110,7 @@ function init_test_options {
           [ -z $NARAYANA_BUILD ] && NARAYANA_BUILD=1
           export AS_BUILD=0 AS_CLONE=0 AS_TESTS=0 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
           export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0
-          export TOMCAT_TESTS=1 LRA_TESTS=0
+          export TOMCAT_TESTS=1 LRA_TESTS=0 LRA_AS_TESTS=0
         else
           export COMMENT_ON_PULL=""
         fi
@@ -115,9 +120,9 @@ function init_test_options {
             fatal "Requested JDK version $_jdk cannot run with axis $PROFILE: please use jdk 11 instead"
           fi
           comment_on_pull "Started testing this pull request with $PROFILE profile: $BUILD_URL"
-          export AS_BUILD=1 AS_CLONE=1 AS_TESTS=1 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
+          export AS_BUILD=0 AS_CLONE=1 AS_TESTS=1 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
           export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0
-          export TOMCAT_TESTS=0 LRA_TESTS=0
+          export TOMCAT_TESTS=0 LRA_TESTS=0 LRA_AS_TESTS=0
         else
           export COMMENT_ON_PULL=""
         fi
@@ -129,7 +134,7 @@ function init_test_options {
           comment_on_pull "Started testing this pull request with RTS profile: $BUILD_URL"
           export AS_BUILD=1 AS_CLONE=1 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
           export RTS_AS_TESTS=1 RTS_TESTS=1 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0
-          export TOMCAT_TESTS=0 LRA_TESTS=0
+          export TOMCAT_TESTS=0 LRA_TESTS=0 LRA_AS_TESTS=0
         else
           export COMMENT_ON_PULL=""
         fi
@@ -141,7 +146,7 @@ function init_test_options {
           comment_on_pull "Started testing this pull request with JACOCO profile: $BUILD_URL"
           export AS_BUILD=1 AS_CLONE=1 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=1 XTS_AS_TESTS=0 XTS_TESTS=1 COMPENSATIONS_TESTS=1 txbridge=1
           export RTS_AS_TESTS=0 RTS_TESTS=1 JTA_CDI_TESTS=1 QA_TESTS=1 JAC_ORB=0 JTA_AS_TESTS=1
-          export TOMCAT_TESTS=1 LRA_TESTS=0 CODE_COVERAGE=1 CODE_COVERAGE_ARGS="-PcodeCoverage -Pfindbugs"
+          export TOMCAT_TESTS=0 LRA_TESTS=1 LRA_AS_TESTS=0 CODE_COVERAGE=1 CODE_COVERAGE_ARGS="-PcodeCoverage -Pfindbugs"
           [ -z ${MAVEN_OPTS+x} ] && export MAVEN_OPTS="-Xms2048m -Xmx2048m"
         else
           export COMMENT_ON_PULL=""
@@ -154,7 +159,7 @@ function init_test_options {
           comment_on_pull "Started testing this pull request with XTS profile: $BUILD_URL"
           export AS_BUILD=1 AS_CLONE=1 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=1 XTS_TESTS=1 COMPENSATIONS_TESTS=1 txbridge=1
           export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0
-          export TOMCAT_TESTS=0 LRA_TESTS=0
+          export TOMCAT_TESTS=0 LRA_TESTS=0 LRA_AS_TESTS=0
         else
           export COMMENT_ON_PULL=""
         fi
@@ -163,7 +168,7 @@ function init_test_options {
           comment_on_pull "Started testing this pull request with QA_JTA profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
           export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 JAC_ORB=0 QA_TARGET=ci-tests-nojts JTA_AS_TESTS=0
-          export TOMCAT_TESTS=0 LRA_TESTS=0
+          export TOMCAT_TESTS=0 LRA_TESTS=0 LRA_AS_TESTS=0
         else
           export COMMENT_ON_PULL=""
         fi
@@ -172,7 +177,7 @@ function init_test_options {
           comment_on_pull "Started testing this pull request with QA_JTS_OPENJDKORB profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_TESTS=0 NARAYANA_BUILD=1  NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
           export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 JAC_ORB=0 QA_TARGET=ci-jts-tests
-          export JTA_AS_TESTS=0 TOMCAT_TESTS=0 LRA_TESTS=0
+          export JTA_AS_TESTS=0 TOMCAT_TESTS=0 LRA_TESTS=0 LRA_AS_TESTS=0
         else
           export COMMENT_ON_PULL=""
         fi
@@ -181,7 +186,7 @@ function init_test_options {
           comment_on_pull "Started testing this pull request with PERF profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
           export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0 PERF_TESTS=1
-          export TOMCAT_TESTS=0 LRA_TESTS=0
+          export TOMCAT_TESTS=0 LRA_TESTS=0 LRA_AS_TESTS=0
         else
           export COMMENT_ON_PULL=""
         fi
@@ -190,7 +195,7 @@ function init_test_options {
           comment_on_pull "Started testing this pull request with LRA profile: $BUILD_URL"
           export AS_BUILD=1 AS_CLONE=1 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=0 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
           export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=0 JAC_ORB=0 JTA_AS_TESTS=0
-          export TOMCAT_TESTS=0 LRA_TESTS=1
+          export TOMCAT_TESTS=0 LRA_TESTS=1 LRA_AS_TESTS=1
         else
           export COMMENT_ON_PULL=""
         fi
@@ -199,7 +204,7 @@ function init_test_options {
           comment_on_pull "Started testing this pull request with DB_TESTS profile: $BUILD_URL"
           export AS_BUILD=0 AS_CLONE=0 AS_TESTS=0 NARAYANA_BUILD=1 NARAYANA_TESTS=1 XTS_AS_TESTS=0 XTS_TESTS=0 COMPENSATIONS_TESTS=0 txbridge=0
           export RTS_AS_TESTS=0 RTS_TESTS=0 JTA_CDI_TESTS=0 QA_TESTS=1 OPENJDK_ORB=1 JAC_ORB=0 JTA_AS_TESTS=0
-          export TOMCAT_TESTS=0 LRA_TESTS=0
+          export TOMCAT_TESTS=0 LRA_TESTS=0 LRA_AS_TESTS=0
         else
           export COMMENT_ON_PULL=""
         fi
@@ -207,6 +212,7 @@ function init_test_options {
         export COMMENT_ON_PULL=""
         comment_on_pull "Started testing this pull request with $PROFILE profile: $BUILD_URL"
     fi
+    wildfly_minimum_jdk
     [ $NARAYANA_TESTS ] || NARAYANA_TESTS=0	# run the narayana surefire tests
     [ $NARAYANA_BUILD ] || NARAYANA_BUILD=0 # build narayana
     [ $AS_CLONE ] && [ -z "$WILDFLY_CLONED_REPO" ] || AS_CLONE=0 # git clone the AS repo when WILDFLY_CLONED_REPO is not provided
@@ -217,6 +223,7 @@ function init_test_options {
     [ $XTS_AS_TESTS ] || XTS_AS_TESTS=0 # XTS tests
     [ $RTS_AS_TESTS ] || RTS_AS_TESTS=0 # RTS tests
     [ $RTS_TESTS ] || RTS_TESTS=0 # REST-AT Test
+    [ $LRA_AS_TESTS ] || LRA_AS_TESTS=0 #LRA tests
     [ $LRA_TESTS ] || LRA_TESTS=0 # LRA Test
     [ $TOMCAT_TESTS ] || TOMCAT_TESTS=0 # Narayana Tomcat tests
     [ $JTA_CDI_TESTS ] || JTA_CDI_TESTS=0 # JTA CDI Tests
@@ -396,8 +403,7 @@ function build_as {
   if [ ! -d  ${WILDFLY_CLONED_REPO}/dist/target/wildfly-${WILDFLY_VERSION_FROM_JBOSS_AS} ]; then
 
     # building WildFly
-    [ "$_jdk" -lt 17 ] && export MAVEN_OPTS="-XX:MaxMetaspaceSize=512m -XX:+UseConcMarkSweepGC $MAVEN_OPTS"
-    [ "$_jdk" -ge 17 ] && export MAVEN_OPTS="-XX:MaxMetaspaceSize=512m $MAVEN_OPTS"
+    export MAVEN_OPTS="-XX:MaxMetaspaceSize=512m $MAVEN_OPTS"
     JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MaxMetaspaceSize=512m $JAVA_OPTS" ./build.sh clean install -B -DskipTests -Dts.smoke=false $IPV6_OPTS -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@"
     [ $? -eq 0 ] || fatal "AS build failed"
 
@@ -415,13 +421,9 @@ function build_as {
 
 function tests_as {
   # running WildFly testsuite if configured to be run by axis AS_TESTS
-  if [ $AS_TESTS_TRACE ]; then
-    enable_as_trace "$JBOSS_HOME/standalone/configuration/standalone.xml"
-    enable_as_trace "$JBOSS_HOME/standalone/configuration/standalone-full.xml"
-  fi
 
   cd $WILDFLY_CLONED_REPO
-  JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MaxMetaspaceSize=512m $JAVA_OPTS" ./integration-tests.sh -B $IPV6_OPTS -Dtimeout.factor=300 -Dsurefire.forked.process.timeout=12000 -Dsurefire.extra.args='-Xmx512m' -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} -Djboss.dist="$JBOSS_HOME" -DallTests=true -fae "$@" clean verify
+  JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MaxMetaspaceSize=512m $JAVA_OPTS" ./build.sh clean install -B -DallTests $IPV6_OPTS -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@"
   [ $? -eq 0 ] || fatal "AS tests failed"
   cd $WORKSPACE
 }
@@ -437,6 +439,11 @@ function init_jboss_home {
   grep 'connection-timeout' "${CONF}"
   #Enable remote debugger
   echo JAVA_OPTS='"$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n"' >> "$JBOSS_HOME"/bin/standalone.conf
+
+  if [ $AS_TESTS_TRACE ]; then
+    enable_as_trace "$JBOSS_HOME/standalone/configuration/standalone.xml"
+    enable_as_trace "$JBOSS_HOME/standalone/configuration/standalone-full.xml"
+  fi
 }
 
 function xts_as_tests {
@@ -473,6 +480,15 @@ function jta_as_tests {
   cd ${WORKSPACE}
 }
 
+function lra_as_tests {
+  echo "#-1. LRA AS Tests"
+  cd $WILDFLY_CLONED_REPO
+  ./build.sh -f testsuite/integration/microprofile-tck/lra/pom.xml -fae -B -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@" test
+  [ $? -eq 0 ] || fatal "LRA AS Test failed"
+  ./build.sh -f microprofile/lra/pom.xml -fae -B -Dversion.org.jboss.narayana=${NARAYANA_CURRENT_VERSION} "$@" test
+  [ $? -eq 0 ] || fatal "LRA AS Test failed"
+  cd ${WORKSPACE}
+}
 
 function rts_tests {
   echo "#0. REST-AT Integration Test"
@@ -488,7 +504,8 @@ function lra_tests {
   echo "#0. LRA Test"
   cd ./rts/lra/
   echo "#0. Running LRA tests using $ARQ_PROF profile"
-  PRESERVE_WORKING_DIR=true ../../build.sh -fae -B -Pcommunity -P$ARQ_PROF $CODE_COVERAGE_ARGS $ENABLE_LRA_TRACE_LOGS -Dlra.test.timeout.factor="${LRA_TEST_TIMEOUT_FACTOR:-1.5}" "$@"
+  # Ideally the following target would be test and integration-test but that doesn't seem to shutdown the server each time
+  PRESERVE_WORKING_DIR=true ../../build.sh -fae -B -Pcommunity -P$ARQ_PROF $CODE_COVERAGE_ARGS $ENABLE_LRA_TRACE_LOGS -Dlra.test.timeout.factor="${LRA_TEST_TIMEOUT_FACTOR:-1.5}" "$@" install
   lra_arq=$?
   if [ $lra_arq != 0 ] ; then fatal "LRA Test failed with failures in $ARQ_PROF profile" ; fi
 }
@@ -508,6 +525,8 @@ function compensations_tests {
   [ $? -eq 0 ] || fatal "compensations build failed"
   ./build.sh -f compensations/pom.xml -fae -B -P$ARQ_PROF-weld $CODE_COVERAGE_ARGS "$@" test
   [ $? -eq 0 ] || fatal "compensations build failed"
+  rm $JBOSS_HOME/standalone/deployments/restat-web-*.war
+  [ $? -eq 0 ] || fatal "Could not remove .war file"
 }
 
 function xts_tests {
@@ -544,7 +563,7 @@ function xts_tests {
   fi
 
   [ $? -eq 0 ] || fatal "XTS: SOME TESTS failed"
-  if [ $ran_crt = 1 ] && [[ ! "$@" =~ "-DskipTests" ]]; then
+  if [ $ran_crt = 1 ] && [[ ! "$@" =~ "-DskipTests" ]] && [ $XTS_AS_TESTS = 1 ]; then
     (cd XTS/localjunit/crash-recovery-tests && java -cp target/classes/ com.arjuna.qa.simplifylogs.SimplifyLogs ./target/log/ ./target/log-simplified)
     if [[ $? != 0 && $ISIBM != 0 && -z $CODE_COVERAGE_ARGS ]]; then
       fatal "Simplify CRASH RECOVERY logs failed"
@@ -769,6 +788,7 @@ function qa_tests_once {
     if [ $codeCoverage = true ]; then
       echo "generating test coverage report"
       ant -f run-tests.xml jacoco-report
+      [ $? -eq 0 ] || fatal "Jacoco report generation failed"
     fi
 
     # archive the jtsremote test output (use a name related to the orb that was used for the tests)
@@ -921,7 +941,8 @@ export ANT_OPTS="$ANT_OPTS $IPV6_OPTS"
 [ $XTS_AS_TESTS = 1 ] && xts_as_tests "$@"
 [ $RTS_AS_TESTS = 1 ] && rts_as_tests "$@"
 [ $JTA_AS_TESTS = 1 ] && jta_as_tests "$@"
-[ $COMPENSATIONS_TESTS = 1 ] && compensations_tests "$@"
+[ $LRA_AS_TESTS = 1 ] && lra_as_tests "$@"
+[ $COMPENSATIONS_TESTS = 1 ] && [ "$_jdk" -ge 17 ] && compensations_tests "$@"
 [ $XTS_TESTS = 1 ] && xts_tests "$@"
 [ $txbridge = 1 ] && tx_bridge_tests "$@"
 [ $RTS_TESTS = 1 ] && rts_tests "$@"
